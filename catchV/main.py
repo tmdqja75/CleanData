@@ -41,7 +41,7 @@ def embeded_file(datapath):
     return rb
 
 
-def display(file_name, encoding_file):
+def display(file_name, encoding_file, id):
     """
     :parameter
         :param file_name: VideoCapture 실행 시킬 경로.
@@ -71,7 +71,9 @@ def display(file_name, encoding_file):
     cv2.destroyAllWindows()
 
 
-### 실행
+# 실행
+# CleanData 폴더에서 실행할것.
+# python catchV/main.py
 if __name__ == '__main__':
-    rb=embeded_file(datapath='.\\data') # embed
-    display(file_name=0, encoding_file='.\\data\\dataset.pkl') # detected
+    rb=embeded_file(datapath='./data') # embed
+    display(file_name=0, encoding_file='.\\data\\dataset.pkl', id='cjh') # detected
