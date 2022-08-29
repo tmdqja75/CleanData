@@ -9,8 +9,12 @@ from deepface.commons import distance
 from deepface.detectors import FaceDetector
 from deepface.commons import distance as dst
 
+from yoloface.face_detector import YoloDetector
+from PIL import Image
+
+
 model_name = 'Facenet512' # fix
-detector_backend = 'mtcnn' # fix
+detector_backend = 'skip' # fix
 
 def splitData(obj):
     """
@@ -129,15 +133,20 @@ def detectAndDisplay_yolo_df(image, id, df):
     :return
         : boolean (미완성)
     """
-    start_time = time.time()
-    face_detector = FaceDetector.build_model(detector_backend)
+    # start_time = time.time()
+    # face_detector = FaceDetector.build_model(detector_backend)
     
-    face_detect_tic = time.time()
-    obj = FaceDetector.detect_faces(face_detector=face_detector,
-                                    detector_backend=detector_backend, img=image)
-    face_detect_toc = time.time()
-    print(f'Face detection took {face_detect_toc-face_detect_tic} sec')
+    # face_detect_tic = time.time()
+    # obj = FaceDetector.detect_faces(face_detector=face_detector,
+    #                                 detector_backend=detector_backend, img=image)
+    # face_detect_toc = time.time()
+    # print(f'Face detection took {face_detect_toc-face_detect_tic} sec')
     
+    # ---------YOLOv5 적용 코드 -------------
+    model = YoloDetector(target_size=720,gpu=0,min_face=90)
+    img_np = np.array(image)
+    bboxes, points = model.predict(img_np)
+    #--------------------------------------
 
     threshold = distance.findThreshold(model_name, 'cosine')  # 정답 0.3
 
