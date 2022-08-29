@@ -10,7 +10,7 @@ import math
 import numpy as np
 import cv2
 
-def load_detector(path="./commons/facedetection-mobilenetv2-size224-alpha0.75.h5"):
+def load_detector(path="./catchV/commons/facedetection-mobilenetv2-size224-alpha0.75.h5"):
     print(os.getcwd())
     input_tensor = Input(shape=(224, 224, 3))
     output_tensor = MobileNetV2(weights=None, include_top=False, input_tensor=input_tensor, alpha=0.75).output

@@ -2,15 +2,18 @@ import os
 import pickle
 
 
-def make_pickle(emb_dic, datapath):
+def make_pickle(emb_dic, datapath, pro):
     """
     :parameter:
         :param:emb_dic(dictionary): 딕셔너리 형태로 데이터가 들어옴.
         :param:datapath(string): 데이터의 경로.
+        :param:pro(bool): 전문 배우의 pkl
     :return:
         rb(dictionary): emb_dic을 다시 불러와줌.
     """
     pickle_name = 'dataset.pkl'
+    if pro:
+        pickle_name = 'pro_dataset.pkl'
 
     try:  # 기존 pickle이 존재 덮어 쓰기
         f = open(datapath + "/" + pickle_name, 'rb')
