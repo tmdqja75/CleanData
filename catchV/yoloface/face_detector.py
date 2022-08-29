@@ -10,10 +10,10 @@ import scipy
 import pathlib
 from math import sqrt
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname("__file__"), '..')))
-from models.common import Conv
-from models.yolo import Model
-from utils.datasets import letterbox
-from utils.general import check_img_size, non_max_suppression_face, \
+from catchV.yoloface.models.common import Conv
+from catchV.yoloface.models.yolo import Model
+from catchV.yoloface.utils.datasets import letterbox
+from catchV.yoloface.utils.general import check_img_size, non_max_suppression_face, \
     scale_coords,scale_coords_landmarks,filter_boxes
 
 class YoloDetector:

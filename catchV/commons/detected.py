@@ -145,7 +145,7 @@ def detectAndDisplay_yolo_df(image, df):
     # ---------YOLOv5 적용 코드 -------------
     model = YoloDetector(target_size=720,gpu=0,min_face=90)
     img_np = np.array(image)
-    bboxes, points = model.predict(img_np)
+    bboxes, _ = model.predict(img_np)
     #--------------------------------------
 
     threshold = distance.findThreshold(model_name, 'cosine')  # 정답 0.3
