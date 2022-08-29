@@ -9,7 +9,7 @@ from deepface.commons import distance
 from deepface.detectors import FaceDetector
 from deepface.commons import distance as dst
 
-from yoloface.face_detector import YoloDetector
+from catchV.yoloface.face_detector import YoloDetector
 from PIL import Image
 
 
