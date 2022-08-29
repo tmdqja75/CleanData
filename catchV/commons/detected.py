@@ -58,7 +58,7 @@ def detectAndDisplay(image, id, df):
 
     print(dist_cnt)
     for i, (encoding, (startX, startY, endX, endY)) in enumerate(zip(encodings, boxes)):
-        for da in data[id]:
+        for da in df[id]:
             dist = distance.findCosineDistance(encoding, da)  # 거리값을 하나씩 계산 cosine 로 사용
             # print(dist)
             if dist <= threshold:  # threshold보다 작으면 cnt
@@ -76,7 +76,7 @@ def detectAndDisplay(image, id, df):
         color = (0, 255, 0)  # 기본 green 색상
 
         if dist_cnt[i] == max_cnt and max_cnt != 0:
-            cnt_avg = max_cnt / len(data[id])
+            cnt_avg = max_cnt / len(df[id])
             name = id + " " + str(round(cnt_avg, 3) * 100) + "%"
             color = (255, 0, 0)
         cv2.rectangle(image, (startX, startY), (endX, endY), color, 2)  # 얼굴 사각형 그려주기
