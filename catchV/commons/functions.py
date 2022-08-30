@@ -14,12 +14,11 @@ def make_pickle(emb_dic, datapath, pro):
     pickle_name = 'dataset.pkl'
     if pro:
         pickle_name = 'pro_dataset.pkl'
-
     try:  # 기존 pickle이 존재 덮어 쓰기
         f = open(datapath + "/" + pickle_name, 'rb')
         rb = pickle.load(f)
         f.close()
-        for d_name in rb.keys():
+        for d_name in emb_dic.keys():
             if d_name in emb_dic.keys():  # 기존 이름 있으면 데이터 추가
                 rb[d_name].extend(emb_dic[d_name])
             else:
