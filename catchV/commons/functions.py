@@ -1,6 +1,6 @@
 import os
 import pickle
-
+import pandas as pd
 
 def make_pickle(emb_dic, datapath, pro):
     """
@@ -53,3 +53,7 @@ def rm_dir(paths):  # 파일 삭제.
             continue
 
 
+def read_youtube_csv(path): # "./testURL_youtube.csv"
+    df_youtube = pd.read_csv(path)
+    df_youtube['upload_date'] = pd.to_datetime(df_youtube['upload_date'], format="%Y%m")
+    return df_youtube

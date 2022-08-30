@@ -23,13 +23,11 @@ def embeded_file(datapath):
     img_path_list = []
     img_path_list.extend(glob(os.path.join(datapath, '*/*.*')))
 
-    print(img_path_list)
-
     model_name = 'Facenet512'
     detector_backend = 'skip'
 
     emb_dic = {}
-    print(img_path_list)
+
     for img_path in tqdm(img_path_list):
         if platform.system() == 'Windows':
             split_key = '\\'
@@ -92,7 +90,7 @@ def proActorEmbeded(datapath):
     detector_backend = 'skip'
 
     emb_dic = {}
-    print(img_path_list)
+
     for img_path in tqdm(img_path_list):
         if platform.system() == 'Windows':
             split_key = '\\'
@@ -140,8 +138,70 @@ def proActorEmbeded(datapath):
 
     return rb
 
+###########################
+import pyautogui
+from time import time
+import time as ti
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 
-def display_df(file_name, encoding_df, pro_encoding_df):
+
+
+def crawling_path(driver,url):
+
+    driver.get(url)
+    # 기다림
+
+    ti.sleep(5)
+    # wait = WebDriverWait(driver, 10)
+    # wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'html5-video-container')))
+
+    try:
+        player_btn = driver.find_element(by=By.XPATH, value='//button[@class="ytp-large-play-button ytp-button"]')
+        player_btn.send_keys(Keys.SPACE)
+    except:
+        pass
+    # 총 동영상 길이에 따른 필터링
+    total_time = driver.find_element(By.XPATH, '//span[@class="ytp-time-duration"]')
+    dateString = total_time.text  # '4:46' '10:46' '1:00:02'
+
+    # if len(dateString) == 4:
+    #     tmp_idx = 1
+    # elif len(dateString) == 5:
+    #     tmp_idx = 2
+    surplus = 120
+    # second = (int(dateString[:tmp_idx]) * 60) + int(dateString[-2:])
+    # total_time = round(time() + second)
+    raw_second = 300
+
+    raw_totalTime = round(time() + raw_second + surplus)
+    # if total_time > raw_totalTime:
+    #     print("동일한 영상이 아닙니다(영상길이)")
+
+    # 전체화면
+    fullScreen_btn = driver.find_elements(By.XPATH, '//button[@class="ytp-fullscreen-button ytp-button"]')
+    fullScreen_btn[0].click()
+
+    setting_btn = driver.find_elements(By.XPATH, '//button[@class="ytp-button ytp-settings-button"]')
+    setting_btn_hd = driver.find_elements(By.XPATH,
+                                          '//button[@class="ytp-button ytp-settings-button ytp-hd-quality-badge"]')
+
+    if setting_btn:
+        setting_btn[0].click()
+    elif setting_btn_hd:
+        setting_btn_hd[0].click()
+
+    id, is_vitim = display_df(driver=driver, url_name=url, dateString=dateString,
+                          encoding_df=encoding_df, pro_encoding_df=pro_encoding_df)
+
+    return id, is_vitim
+
+
+
+#################################
+def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df):
     """
 
     :parameter
@@ -149,38 +209,38 @@ def display_df(file_name, encoding_df, pro_encoding_df):
         :param encoding_df: encoding 된 dataframe 형태
         :param pro_encoding_df: encoding 된 전문 배우
     :return:
+        :param
     """
-    cap = cv2.VideoCapture(file_name)
-
-    if not cap.isOpened:
-        print('-- (!) Check your cap or video root (!) --')
-        exit(0)
-    frame_cnt = 0
+    print("display_df")  ###########################
     match_cnt = 0
     while True:
-        ret, frame = cap.read()
-        frame_cnt+=1
-        if frame is None:
-            print('-- (!) Check your cap or video root (!) --')
-            cap.release()
-            return False
+        ing_video = driver.find_element(By.XPATH, '//span[@class="ytp-time-current"]').get_attribute('innerText')
 
-        if frame_cnt % 3 == 0:
-            test = detected.detectAndDisplay_yolo_df(frame, encoding_df, pro_encoding_df)
-            if test:
-                print()
-                match_cnt += 1
-                if match_cnt == 15:
-                    cap.release()
-                    return True
+        screen = pyautogui.screenshot(region=(0, 0, 1920, 1080))
+        screen = np.array(screen)
+        src = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+        frameUnderTest = np.array(src)
+        if ing_video==dateString:
+            return None, False
 
+        id, pro_act = detected.detectAndDisplay_yolo_df(frameUnderTest, encoding_df, pro_encoding_df)
+        if id and not pro_act:
+            match_cnt += 1
+            print("!!!catch!!!")
+            if match_cnt == 15:
+                return id, False
+
+        elif pro_act:
+            print(f'this pro actor url {url_name}')
+            return id, True
+        else:
+            pass
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            cap.release()
-            return False
-            break
+            return None, False
 
     cv2.destroyAllWindows()
-    return False
+    return None, False
+
 
 
 # 실행
@@ -189,8 +249,8 @@ def display_df(file_name, encoding_df, pro_encoding_df):
 if __name__ == '__main__':
 
     if platform.system() == 'Windows':
-        rb = embeded_file(datapath='.\\data')
-        pro_rb = proActorEmbeded(datapath='.\\data')
+        # rb = embeded_file(datapath='.\\data')
+        # pro_rb = proActorEmbeded(datapath='.\\data')
         encoding_file = '.\\data\\dataset.pkl'
         pro_encoding = '.\\data\\pro_dataset.pkl'
     else:
@@ -224,5 +284,33 @@ if __name__ == '__main__':
 
     encoding_df = pd.DataFrame(people_candidates, columns=['candidate', 'embedding'])
     pro_encoding_df = pd.DataFrame(people_candidates2, columns=['candidate2', 'embedding2'])
-    print(encoding_df)
-    display_df(file_name=0, encoding_df=encoding_df, pro_encoding_df=pro_encoding_df)
+
+    start_date = '2018-09-01' # 날짜 고쳐야 하는 부분
+    df_youtube = functions.read_youtube_csv('./catchV/testURL_youtube.csv')
+    urls = df_youtube.loc[(df_youtube['upload_date'] >= start_date) & (df_youtube['pro_actor'] == False), 'link'].to_list()
+
+    tmp_df1 = df_youtube.loc[
+        (df_youtube['upload_date'] >= start_date) & (df_youtube['pro_actor'] == False), :]
+
+
+    ext_file2 = './catchV/cjpalhdlnbpafiamejdnhcphjbkeiagm.crx'
+    executable_path = './catchV/chromedriver.exe'
+    options = Options()
+    # options.add_argument('headless')
+    # options.add_argument('lang=ko_KR')
+    options.add_extension(ext_file2)
+
+    driver = webdriver.Chrome(executable_path=executable_path, chrome_options=options)
+
+    for i, url in enumerate(urls):
+        id, is_vitim = crawling_path(driver=driver, url=url) # 이름, 전문배우 (맞으면 True, 틀리면 False)
+        if is_vitim:
+            tmp_df1["pro_actor"][i] = is_vitim
+            tmp_df1["id"][i] = id
+        else:
+            tmp_df1["id"][i] = id
+    tmp_df1.to_csv('./test.csv', encoding='UTF8')
+
+
+
+

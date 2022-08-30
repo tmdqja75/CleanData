@@ -64,14 +64,14 @@ def detectAndDisplay_yolo_df(image, df, pro_df):
         :param df: dataframe 된 고객 사진
         :param pro_df: pro data in DataFrame
     :return
-        : boolean
+        :(name, bool)
     """
     # --------time check-------- #
     start_time = time.time()
     face_detect_tic = time.time()
     # --------time check-------- #
 
-    match_check = False
+    match_check = (None, False)
 
     frame = cv2.resize(image, (1920, 1080))
     frame_copy = np.array(frame)
@@ -93,21 +93,32 @@ def detectAndDisplay_yolo_df(image, df, pro_df):
                                                 detector_backend=detector_backend, enforce_detection=False)
 
             col_name = f'distance_from_{i}'
-            print(np.array(df['embedding'].values.tolist()))
-            df[col_name] = findDistance(np.array(frame_encoding), np.array(df['embedding'].values.tolist()))
 
+            df[col_name] = findDistance(np.array(frame_encoding), np.array(df['embedding'].values.tolist()))
             df = df.sort_values(by=[col_name])
             finalist = df.iloc[0]
             final_name = finalist['candidate']
             best_distance = finalist[col_name]
 
+            pro_df[col_name] = findDistance(np.array(frame_encoding), np.array(pro_df['embedding2'].values.tolist()))
+            pro_df = pro_df.sort_values(by=[col_name])
+            finalist_pro = pro_df.iloc[0]
+            final_name_pro = finalist_pro['candidate2']
+            best_distance_pro = finalist_pro[col_name]
+
             color = (0, 255, 0)
-            name = 'unknown'
+            name = None
 
             if best_distance <= threshold:
                 color = (255, 0, 0)
                 name = final_name
-                match_check = True
+                match_check = (name, False)
+
+            if best_distance_pro <= threshold:
+                color = (255, 0, 0)
+                name = final_name_pro
+                match_check = (name, True)
+
             cv2.rectangle(frame, (x, y), (x_h, y_h), color, 2)
             cv2.putText(frame, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
 
@@ -119,7 +130,8 @@ def detectAndDisplay_yolo_df(image, df, pro_df):
     print(f'Detection took {detection_time} seconds')
     print(f'Comparison takes {process_time - detection_time} seconds')
     # --------time check-------- #
-
+    cv2.namedWindow("frame", flags=cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("frame", width=1920, height=1080)
     cv2.imshow("frame", frame)
 
     return match_check
