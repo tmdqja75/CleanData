@@ -56,7 +56,7 @@ def findDistance(target, compare):
     return final
 
 
-def detectAndDisplay_yolo_df(image, df, pro_df):
+def detectAndDisplay_yolo_df(image, df, pro_df, model):
     """
     이미지에 그림을 그려주며 판단해 주는 함수.
     :parameter
@@ -73,21 +73,20 @@ def detectAndDisplay_yolo_df(image, df, pro_df):
 
     match_check = (None, False)
 
-    
-    frame_copy = np.array(frame)
-
-    yolo_model = FaceDetector()
-    yolo_boxes = yolo_model.detect(frame, 0.7)
-    yb = get_boxes_points(yolo_boxes, frame.shape)
+    # ---------YOLOv5 적용 코드 -------------
+    bboxes, _ = model.predict(image) # [[[432, 134, 545, 280], [72, 221, 171, 358], [209, 225, 314, 357],...]]
+    bboxes = bboxes[0]
+    #--------------------------------------
+    face_detect_toc = time.time()
 
     threshold = distance.findThreshold(model_name, 'cosine')  # 정답 0.3
 
     face_detect_toc = time.time()
 
-    if len(yb) > 0:
-        for i in range(len(yb)):
-            x, y, x_h, y_h = yb[i]
-            imcrop = frame_copy[y:y_h + 1, x:x_h + 1, :]
+    if len(bboxes) > 0:
+        for i in range(len(bboxes)):
+            x, y, x_h, y_h = bboxes[i]
+            imcrop = image[y:y_h + 1, x:x_h + 1, :]
 
             frame_encoding = DeepFace.represent(img_path=imcrop, model_name=model_name,
                                                 detector_backend=detector_backend, enforce_detection=False)

@@ -3,6 +3,7 @@ from commons.facedetect import get_boxes_points, FaceDetector
 from glob import glob
 from deepface import DeepFace
 from tqdm import tqdm
+from catchV.yoloface.face_detector import YoloDetector
 
 import os
 import pickle
@@ -149,7 +150,7 @@ from selenium.webdriver.common.keys import Keys
 
 
 
-def crawling_path(driver,url):
+def crawling_path(driver,url, model):
 
     driver.get(url)
     # 기다림
@@ -194,14 +195,14 @@ def crawling_path(driver,url):
         setting_btn_hd[0].click()
 
     id, is_vitim = display_df(driver=driver, url_name=url, dateString=dateString,
-                          encoding_df=encoding_df, pro_encoding_df=pro_encoding_df)
+                          encoding_df=encoding_df, pro_encoding_df=pro_encoding_df, model=model)
 
     return id, is_vitim
 
 
 
 #################################
-def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df):
+def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model):
     """
 
     :parameter
@@ -223,7 +224,7 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df):
         if ing_video==dateString:
             return None, False
 
-        id, pro_act = detected.detectAndDisplay_yolo_df(frameUnderTest, encoding_df, pro_encoding_df)
+        id, pro_act = detected.detectAndDisplay_yolo_df(frameUnderTest, encoding_df, pro_encoding_df, model)
         if id and not pro_act:
             match_cnt += 1
             print("!!!catch!!!")
@@ -253,11 +254,13 @@ if __name__ == '__main__':
         # pro_rb = proActorEmbeded(datapath='.\\data')
         encoding_file = '.\\data\\dataset.pkl'
         pro_encoding = '.\\data\\pro_dataset.pkl'
+        gpu_name = 0
     else:
         rb = embeded_file(datapath='../../data')
         pro_rb = proActorEmbeded(datapath='../../data')
         encoding_file = '../../data/dataset.pkl'
         pro_encoding = '../../data/pro_dataset.pkl'
+        gpu_name = 'mps'
 
     data = pickle.loads(open(encoding_file, "rb").read())
     pro_data = pickle.loads(open(pro_encoding, "rb").read())
@@ -302,8 +305,11 @@ if __name__ == '__main__':
 
     driver = webdriver.Chrome(executable_path=executable_path, chrome_options=options)
 
+    model = YoloDetector(weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml',
+                         target_size=480, gpu=gpu_name)
+    
     for i, url in enumerate(urls):
-        id, is_vitim = crawling_path(driver=driver, url=url) # 이름, 전문배우 (맞으면 True, 틀리면 False)
+        id, is_vitim = crawling_path(driver=driver, url=url, model=model) # 이름, 전문배우 (맞으면 True, 틀리면 False)
         if is_vitim:
             tmp_df1["pro_actor"][i] = is_vitim
             tmp_df1["id"][i] = id
