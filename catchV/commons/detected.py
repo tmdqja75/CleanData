@@ -5,7 +5,7 @@ import numpy as np
 from deepface import DeepFace
 from deepface.commons import distance
 
-from .facedetect import get_boxes_points, FaceDetector
+from catchV.yoloface.face_detector import YoloDetector
 
 # from deepface.detectors import FaceDetector
 
@@ -73,7 +73,7 @@ def detectAndDisplay_yolo_df(image, df, pro_df):
 
     match_check = (None, False)
 
-    frame = cv2.resize(image, (1920, 1080))
+    
     frame_copy = np.array(frame)
 
     yolo_model = FaceDetector()
