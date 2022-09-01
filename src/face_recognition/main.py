@@ -6,7 +6,6 @@ import numpy as np
 import time as ti
 
 from commons import functions, detected
-from time import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -111,7 +110,7 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
 
 # 실행
 # CleanData 폴더에서 실행할것.
-# python ./catchV/main.py
+# python ./face_recognition/main.py
 if __name__ == '__main__':
 
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
@@ -129,7 +128,7 @@ if __name__ == '__main__':
         else:
             tmp_df1.loc[i, "id"] = id
     print(tmp_df1)
-    tmp_df1.to_csv('./test.csv', index=False, encoding='UTF8')
+    tmp_df1.to_csv('./data/answer.csv', index=False, encoding='UTF8')
 
 
 
