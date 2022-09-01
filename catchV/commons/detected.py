@@ -5,13 +5,6 @@ import numpy as np
 from deepface import DeepFace
 from deepface.commons import distance
 
-from catchV.yoloface.face_detector import YoloDetector
-
-# from deepface.detectors import FaceDetector
-
-# from catchV.yoloface.face_detector import YoloDetector
-
-
 model_name = 'Facenet512'  # fix
 detector_backend = 'skip'  # fix mtcnn -> yolo(skip)
 
@@ -118,8 +111,8 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
                 name = final_name_pro
                 match_check = (name, True)
 
-            cv2.rectangle(frame, (x, y), (x_h, y_h), color, 2)
-            cv2.putText(frame, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
+            cv2.rectangle(image, (x, y), (x_h, y_h), color, 2)
+            cv2.putText(image, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
 
     # --------time check-------- #
     end_time = time.time()
@@ -131,6 +124,6 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
     # --------time check-------- #
     cv2.namedWindow("frame", flags=cv2.WINDOW_NORMAL)
     cv2.resizeWindow("frame", width=1920, height=1080)
-    cv2.imshow("frame", frame)
+    cv2.imshow("frame", image)
 
     return match_check
