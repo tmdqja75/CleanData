@@ -28,8 +28,8 @@
     - data 폴더에 dataset.pkl 및 pro_dataset.pkl 넣기
 
 2. 실행방법
-   - pip 
-   - python .\src\face_recognition\main.py
+   - pip install -r requirements.txt
+   - python .\src\main.py
 
 # 주의사항
 1. 더블 모니터에서 확인해야 결과를 확인가능

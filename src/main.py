@@ -12,16 +12,15 @@ from selenium.webdriver.common.keys import Keys
 
 def crawling_path(driver, url, model):
 
+    driver.get(url)
+    ti.sleep(5)
+
     try:
-        driver.get(url)
-        ti.sleep(5)
         player_btn = driver.find_element(by=By.XPATH, value='//button[@class="ytp-large-play-button ytp-button"]')
         player_btn.send_keys(Keys.SPACE)
     except:
-        driver.get(url)
-        ti.sleep(5)
-        player_btn = driver.find_element(by=By.XPATH, value='//button[@class="ytp-large-play-button ytp-button"]')
-        player_btn.send_keys(Keys.SPACE)
+        pass
+
     # 총 동영상 길이에 따른 필터링
     total_time = driver.find_element(By.XPATH, '//span[@class="ytp-time-duration"]')
     dateString = total_time.get_attribute('innerText')  # '4:46' '10:46' '1:00:02'

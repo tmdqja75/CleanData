@@ -8,6 +8,7 @@ import pandas as pd
 from deepface import DeepFace
 from tqdm import tqdm
 from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
 from glob import glob
 
 from .yoloface.face_detector import YoloDetector
@@ -26,25 +27,19 @@ def make_pickle(emb_dic, datapath, pro):
     if pro:
         pickle_name = 'pro_dataset.pkl'
     try:  # 기존 pickle이 존재 덮어 쓰기
-        f = open(datapath + "/" + pickle_name, 'rb')
-        rb = pickle.load(f)
-        f.close()
+        rb = pickle.loads(open(datapath + "/" + pickle_name, 'rb').read())
         for d_name in emb_dic.keys():
-            if d_name in emb_dic.keys():  # 기존 이름 있으면 데이터 추가
+            if d_name in rb.keys():  # 기존 이름 있으면 데이터 추가
                 rb[d_name].extend(emb_dic[d_name])
             else:
                 rb[d_name] = emb_dic[d_name]
-        f = open(datapath + "/" + pickle_name, 'wb')
-        pickle.dump(rb, f)
-        f.close
+        with open(datapath + "/" + pickle_name, 'wb') as f:
+            pickle.dump(rb, f)
     except: # pickle 파일이 존재 안할때
-        f = open(datapath + "/" + pickle_name, 'wb')
-        pickle.dump(emb_dic, f)
-        f.close
+        with open(datapath + "/" + pickle_name, 'wb') as f:
+            pickle.dump(emb_dic, f)
 
-    with open(datapath + "/" + pickle_name, 'rb') as f:
-        rb = pickle.load(f)
-        f.close
+    rb = pickle.loads(open(datapath + "/" + pickle_name, 'rb').read())
     return rb
 
 
@@ -187,15 +182,14 @@ def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
         & (df['total_len'] <= avi_length),:]
     tmp_df1.reset_index(drop=True, inplace=True)
 
-    ext_file2 = './src/face_recognition/cjpalhdlnbpafiamejdnhcphjbkeiagm.crx'
-    executable_path = './src/face_recognition/chromedriver.exe'
+    ext_file2 = './src/cjpalhdlnbpafiamejdnhcphjbkeiagm.crx'
+    executable_path = './src/chromedriver.exe'
 
     options = Options()
 
     options.add_extension(ext_file2)
 
     driver = webdriver.Chrome(executable_path=executable_path, chrome_options=options)
-
 
     return tmp_df1, driver, model, encoding_df, pro_encoding_df
 

@@ -11,7 +11,7 @@ import scipy
 import torch
 import torch.nn as nn
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname("__file__"), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname("__file__"), '../../face_recognition')))
 from .models.common import Conv
 from .models.yolo import Model
 from .utils.datasets import letterbox
