@@ -2,7 +2,7 @@ import platform
 import pyautogui
 import cv2
 import numpy as np
-
+import pandas as pd
 import time as ti
 
 from commons import functions, detected
@@ -108,8 +108,8 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
 # 실행
 # CleanData 폴더에서 실행할것.
 # python ./face_recognition/main.py
-if __name__ == '__main__':
-
+# if __name__ == '__main__':
+def run():
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
     avi_length = 600
     tmp_df1, driver, model,  encoding_df, pro_encoding_df = \
@@ -125,6 +125,8 @@ if __name__ == '__main__':
         else:
             tmp_df1.loc[i, "id"] = id
     print(tmp_df1)
+
+    return tmp_df1
     tmp_df1.to_csv('./data/answer.csv', index=False, encoding='UTF8')
 
 

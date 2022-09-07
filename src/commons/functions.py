@@ -4,6 +4,7 @@ import platform
 import cv2
 import numpy as np
 import pandas as pd
+import platform
 
 from deepface import DeepFace
 from tqdm import tqdm
@@ -132,10 +133,10 @@ def embeded_file(datapath, target, pro, model):
 def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
 
     if os_name == 'Windows':
-        datapath = '.\\data'
+        datapath = '.\\src\\data'
         gpu_name = 0
     else:
-        datapath = '../../data'
+        datapath = './src/data'
         gpu_name = 'mps'
 
     try: # gpu
@@ -183,7 +184,11 @@ def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
     tmp_df1.reset_index(drop=True, inplace=True)
 
     ext_file2 = './src/cjpalhdlnbpafiamejdnhcphjbkeiagm.crx'
-    executable_path = './src/chromedriver.exe'
+    
+    if platform.system() =='Windows':
+        executable_path = './src/chromedriver.exe'
+    else:
+        executable_path = './src/chromedriver'
 
     options = Options()
 
