@@ -116,12 +116,12 @@ def send_csvfile(filename):
     run()
     return send_from_directory('result', filename)
 
-@app.route('/call')
-def check_if_running():
-    try:
+# @app.route('/call')
+# def check_if_running():
+#     try:
         
-    except:
-        return {'able_to_run': "False"}
+#     except:
+#         return {'able_to_run': "False"}
     # return send_from_directory('result', filename)
 
 api.add_resource(Upload, "/user/<string:user_id>")

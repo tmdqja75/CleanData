@@ -10,7 +10,7 @@ from commons import functions, detected
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-def crawling_path(driver, url, model):
+def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
 
     driver.get(url)
     ti.sleep(5)
@@ -115,10 +115,12 @@ def run():
     avi_length = 600
     tmp_df1, driver, model,  encoding_df, pro_encoding_df = \
         functions.default_set(os_name=platform.system(), start_date='2022-07-01', avi_length=avi_length)
-
+    with open('./running.txt', 'w') as f:
+        f.write('True')
+    f.close()
     for i, url in enumerate(tmp_df1['link']):
 
-        id, is_vitim = crawling_path(driver=driver, url=url, model=model) # 이름, 전문배우 (맞으면 True, 틀리면 False)
+        id, is_vitim = crawling_path(driver=driver, url=url, model=model, encoding_df=encoding_df, pro_encoding_df=pro_encoding_df) # 이름, 전문배우 (맞으면 True, 틀리면 False)
         if is_vitim:
             print(is_vitim, id)
             tmp_df1.loc[i, "pro_actor"] = is_vitim
@@ -126,7 +128,9 @@ def run():
         else:
             tmp_df1.loc[i, "id"] = id
     print(tmp_df1)
-
+    with open('./running.txt', 'w') as f:
+        f.write('False')
+    f.close()
     # return tmp_df1
     tmp_df1.to_csv('./result/answer.csv', index=False, encoding='UTF8')
 
