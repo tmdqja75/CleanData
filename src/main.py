@@ -110,6 +110,7 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
 # python ./face_recognition/main.py
 # if __name__ == '__main__':
 def run():
+    ti.sleep(30)
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
     avi_length = 600
     tmp_df1, driver, model,  encoding_df, pro_encoding_df = \
@@ -126,8 +127,8 @@ def run():
             tmp_df1.loc[i, "id"] = id
     print(tmp_df1)
 
-    return tmp_df1
-    tmp_df1.to_csv('./data/answer.csv', index=False, encoding='UTF8')
+    # return tmp_df1
+    tmp_df1.to_csv('./result/answer.csv', index=False, encoding='UTF8')
 
 
 
