@@ -109,17 +109,17 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
 # CleanData 폴더에서 실행할것.
 # python ./face_recognition/main.py
 # if __name__ == '__main__':
-def run():
-    ti.sleep(30)
+def run(startDate):
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
     avi_length = 600
     tmp_df1, driver, model,  encoding_df, pro_encoding_df = \
-        functions.default_set(os_name=platform.system(), start_date='2022-07-01', avi_length=avi_length)
+        functions.default_set(os_name=platform.system(), start_date=startDate, avi_length=avi_length)
+    
     with open('./running.txt', 'w') as f:
         f.write('True')
     f.close()
+    
     for i, url in enumerate(tmp_df1['link']):
-
         id, is_vitim = crawling_path(driver=driver, url=url, model=model, encoding_df=encoding_df, pro_encoding_df=pro_encoding_df) # 이름, 전문배우 (맞으면 True, 틀리면 False)
         if is_vitim:
             print(is_vitim, id)
@@ -128,9 +128,10 @@ def run():
         else:
             tmp_df1.loc[i, "id"] = id
     print(tmp_df1)
+    
     with open('./running.txt', 'w') as f:
         f.write('False')
-    f.close()
+    f.close()    
     # return tmp_df1
     tmp_df1.to_csv('./result/answer.csv', index=False, encoding='UTF8')
 
