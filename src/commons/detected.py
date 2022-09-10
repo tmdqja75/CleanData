@@ -122,8 +122,8 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
     print(f'Detection took {detection_time} seconds')
     print(f'Comparison takes {process_time - detection_time} seconds')
     # --------time check-------- #
-    cv2.namedWindow("frame", flags=cv2.WINDOW_NORMAL)
+    # cv2.namedWindow("frame", flags=cv2.WINDOW_NORMAL)
     cv2.resizeWindow("frame", width=1920, height=1080)
-    cv2.imshow("frame", image)
+    # cv2.imshow("frame", image)
 
     return match_check
