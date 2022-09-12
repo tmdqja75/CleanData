@@ -58,7 +58,6 @@ def output_file(data, code, headers):
 
 @app.route('/image/api', methods=['POST'])
 def image_api():
-    print("deep!")
     # 딥러닝 모델이 돌고 있으면, 모델이 돌고 있다는 값 반환하고 post 함수 exit.
     with open(cleandata+'/data/running.txt', 'r') as f:
         running = f.readline().strip()
@@ -78,7 +77,7 @@ def image_api():
         vid_date = None
     print(request.form['startDate'])
     # 사진 담을 directory 생성하고 만들기
-    file_path = os.path.join(app.config["UPLOAD_FOLDER"], "data/"+img_owner)
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], "target/"+img_owner)
     if not os.path.isdir(file_path):
         os.mkdir(file_path)
     
@@ -91,7 +90,10 @@ def image_api():
         with open(f'{app.config["UPLOAD_FOLDER"]}/startDate.txt', 'a') as f_date:
             f_date.write(vid_date+"\n")
         f_date.close()
-    
+
+    print("app.py line 95 file_path: ",file_path)
+    print("list(request.files.listvalues())[0]", list(request.files.listvalues())[0])
+
     # 사진 파일들을 새 uuid 이름을 지정한 뒤위에 생성된 directory에 저장
     for f in list(request.files.listvalues())[0]:
         if allowed_file(f.filename):
@@ -100,9 +102,14 @@ def image_api():
             filename = str(uuid.uuid1()) + "." + extension
 
             f.save(os.path.join(file_path, filename))
-    requests.post('http://localhost:8080/image/receive', "File(s) successfully uploaded")
+    msg = "File(s) successfully uploaded"
+    print(type(msg))
+    requests.post('http://localhost:8080/image/receive', data=msg)
     # return {"message": "File(s) successfully uploaded"}
-    send_csvfile()
+    resultData = send_csvfile()
+    print("line 111: type", type(resultData))
+    print(request.content_type)
+    requests.post('http://localhost:8080/image/result', json=resultData)
     return {"message": "File(s) successfully uploaded"}
 
 
@@ -144,17 +151,16 @@ def send_csvfile():
         client_dict = dict()
         client_dict['requested_user_email'] = client
         client_dict['urls'] = result[result['id']==client]['link'].to_list()
-        
         return_dict['result'].append(client_dict)
     #------------------------------------------------
     
     # 내보낼 결과값 json 형식으로 변형
     return_json = json.dumps(return_dict, indent=2)
-    print(return_json)
-    send_json(return_json)
-@app.post("/tojson")
-def send_json(return_json):
+    print(return_json, type(return_json))
     return return_json
+@app.post("/image/tojson")
+def send_json(returnJson):
+    return returnJson
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
