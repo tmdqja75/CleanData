@@ -13,7 +13,7 @@ from flask import (Flask, abort, current_app, request, send_file,
 from flask_restful import Api, Resource, reqparse
 from werkzeug.utils import secure_filename
 
-from main import run
+from deteted_model.main import run
 
 app = Flask(__name__)
 app.secret_key = "secret key"
@@ -143,7 +143,7 @@ def send_csvfile():
     
     # ---결과값 json formatting 결과 dict형식으로 준비---
     return_dict = dict()
-    return_dict["total_inspected_video_count"] = len(result)
+    return_dict["total_inspected_video_count"] = str(len(result))
     return_dict['result'] = []
     
     print(list_client)
