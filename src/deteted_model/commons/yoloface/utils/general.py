@@ -15,6 +15,7 @@ import numpy as np
 import torch
 import torchvision
 import yaml
+from fontTools.subset import intersect
 
 from ..utils.google_utils import gsutil_getsize
 from ..utils.metrics import fitness
