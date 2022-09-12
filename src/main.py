@@ -1,8 +1,9 @@
+import os
 import platform
 import pyautogui
 import cv2
 import numpy as np
-
+import pandas as pd
 import time as ti
 
 from commons import functions, detected
@@ -10,9 +11,26 @@ from commons import functions, detected
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-def crawling_path(driver, url, model):
+pwd = os.getcwd()
 
-    driver.get(url)
+os_name = platform.system()
+root = "/"
+
+if os_name == 'Windows':
+    root = "\\"
+
+pwd = os.getcwd()
+cleandata = root.join(pwd.split(root)[:-1])
+print("main.py pwd", pwd)
+print("main.py cleandata", cleandata)
+
+def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
+    while True:
+        driver.get(url)
+        a = driver.current_url
+        print(a)
+        if a != "data:,":
+            break
     ti.sleep(5)
 
     try:
@@ -100,6 +118,8 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return None, False
 
+
+
     cv2.destroyAllWindows()
     return None, False
 
@@ -108,16 +128,19 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
 # 실행
 # CleanData 폴더에서 실행할것.
 # python ./face_recognition/main.py
-if __name__ == '__main__':
-
+# if __name__ == '__main__':
+def run(startDate):
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
     avi_length = 600
     tmp_df1, driver, model,  encoding_df, pro_encoding_df = \
-        functions.default_set(os_name=platform.system(), start_date='2022-07-01', avi_length=avi_length)
-
+        functions.default_set(os_name=platform.system(), start_date=startDate, avi_length=avi_length)
+    
+    with open(cleandata+'/data/running.txt', 'w') as f:
+        f.write('True')
+    f.close()
+    
     for i, url in enumerate(tmp_df1['link']):
-
-        id, is_vitim = crawling_path(driver=driver, url=url, model=model) # 이름, 전문배우 (맞으면 True, 틀리면 False)
+        id, is_vitim = crawling_path(driver=driver, url=url, model=model, encoding_df=encoding_df, pro_encoding_df=pro_encoding_df) # 이름, 전문배우 (맞으면 True, 틀리면 False)
         if is_vitim:
             print(is_vitim, id)
             tmp_df1.loc[i, "pro_actor"] = is_vitim
@@ -125,7 +148,12 @@ if __name__ == '__main__':
         else:
             tmp_df1.loc[i, "id"] = id
     print(tmp_df1)
-    tmp_df1.to_csv('./data/answer.csv', index=False, encoding='UTF8')
+    
+    with open(cleandata+'/data/running.txt', 'w') as f:
+        f.write('False')
+    f.close()    
+    # return tmp_df1
+    tmp_df1.to_csv(cleandata+'/result/answer.csv', index=False, encoding='UTF8')
 
 
 
