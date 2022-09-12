@@ -106,14 +106,12 @@ def image_api():
     print(type(msg))
     requests.post('http://localhost:8080/image/receive', data=msg)
     # return {"message": "File(s) successfully uploaded"}
-    resultData = send_csvfile()
-    print("line 111: type", type(resultData))
-    print(request.content_type)
-    requests.post('http://localhost:8080/image/result', json=resultData)
+    resultData = send_csvfile(img_owner)
+    requests.post('http://localhost:8080/image/result', json=dict(resultData))
     return {"message": "File(s) successfully uploaded"}
 
 
-def send_csvfile():
+def send_csvfile(img_owner):
     # 피해자 리스트 중에 영상 시작일이 가장 일찍인 영상 시점 찾기
     datelist = []
     f_date = open(os.path.join(app.config['UPLOAD_FOLDER'], 'startDate.txt'))
@@ -136,28 +134,28 @@ def send_csvfile():
     # ---결과 읽어오기---
     PATH = os.path.join(cleandata, "result", 'answer.csv')
     df_result = pd.read_csv(PATH)
-    result = df_result[df_result['등장인물']=='정답영상']
-    
+    # result = df_result[df_result['등장인물']=='정답영상']
+    result = df_result.dropna(axis=0)
     list_client = list(result.id.unique())
     #-----------------
     
     # ---결과값 json formatting 결과 dict형식으로 준비---
     return_dict = dict()
-    return_dict["total_inspected_video_count"] = str(len(result))
-    return_dict['result'] = []
-    
-    print(list_client)
+    return_dict["total_inspected_video_count"] = str(len(result)) # 검색한 결과
+    return_dict["result"] = []
+
     for client in list_client:
-        client_dict = dict()
-        client_dict['requested_user_email'] = client
-        client_dict['urls'] = result[result['id']==client]['link'].to_list()
-        return_dict['result'].append(client_dict)
+        if img_owner == client:
+            client_dict = dict()
+            client_dict["requested_user_email"] = client
+            client_dict["urls"] = result[result["id"]==client]["link"].to_list()
+            return_dict["result"].append(client_dict)
     #------------------------------------------------
     
     # 내보낼 결과값 json 형식으로 변형
-    return_json = json.dumps(return_dict, indent=2)
-    print(return_json, type(return_json))
-    return return_json
+    # return_json = json.dumps(return_dict, indent=2)
+    # print(return_json, type(return_json))
+    return return_dict
 @app.post("/image/tojson")
 def send_json(returnJson):
     return returnJson
