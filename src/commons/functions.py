@@ -5,7 +5,6 @@ import cv2
 import numpy as np
 import pandas as pd
 import platform
-import time
 
 from deepface import DeepFace
 from tqdm import tqdm
@@ -15,7 +14,15 @@ from glob import glob
 
 from .yoloface.face_detector import YoloDetector
 
+os_name = platform.system()
 
+root = "/"
+
+if os_name == 'Windows':
+    root = "\\"
+
+cleandata = root.join(os.getcwd().split(root)[:-1])               # D:\src\CleanData
+print("function.py cleandata", cleandata)
 def make_pickle(emb_dic, datapath, pro):
     """
     :parameter:
@@ -29,22 +36,22 @@ def make_pickle(emb_dic, datapath, pro):
     if pro:
         pickle_name = 'pro_dataset.pkl'
     try:  # 기존 pickle이 존재 덮어 쓰기
-        rb = pickle.loads(open("/Users/leegangju/Documents/GitHub/CleanData/src/data/dataset.pkl", 'rb').read())
+        rb = pickle.loads(open(datapath + "/" + pickle_name, 'rb').read())
         for d_name in emb_dic.keys():
             if d_name in rb.keys():  # 기존 이름 있으면 데이터 추가
                 rb[d_name].extend(emb_dic[d_name])
             else:
                 rb[d_name] = emb_dic[d_name]
-        with open("/Users/leegangju/Documents/GitHub/CleanData/src/data/dataset.pkl", 'wb') as f:
+        with open(datapath + "/" + pickle_name, 'wb') as f:
             pickle.dump(rb, f)
     except: # pickle 파일이 존재 안할때
-        with open("/Users/leegangju/Documents/GitHub/CleanData/src/data/dataset.pkl", 'wb') as f:
+        with open(datapath + "/" + pickle_name, 'wb') as f:
             pickle.dump(emb_dic, f)
 
-    rb = pickle.loads(open("/Users/leegangju/Documents/GitHub/CleanData/src/data/dataset.pkl", 'rb').read())
+    rb = pickle.loads(open(datapath + "/" + pickle_name, 'rb').read())
     return rb
-#datapath + "/" + pickle_name, 'rb'
-#"/Users/leegangju/Documents/GitHub/CleanData/src/data/dataset.pkl"
+
+
 def time_second(strtime):
     split_time=strtime.split(":")
     total_time = 0
@@ -62,7 +69,7 @@ def rm_dir(paths):  # 파일 삭제.
         None
     """
     for path in paths:
-        path = "\\".join(path.split("\\")[:-1]) + "\\"
+        path = root.join(path.split(root)[:-1]) + root
         try:
             os.rmdir(path)
         except:
@@ -93,11 +100,7 @@ def embeded_file(datapath, target, pro, model):
     emb_dic = {}
 
     for img_path in tqdm(img_path_list):
-        if platform.system() == 'Windows':
-            split_key = '\\'
-        else:
-            split_key = '/'
-        img_path_split = img_path.split(split_key)
+        img_path_split = img_path.split(root)
         d_name = img_path_split[-2]  # 디렉토리 이름
         # ----Face Detection with YOLO V5-----
         frame = cv2.imread(img_path)
@@ -134,10 +137,10 @@ def embeded_file(datapath, target, pro, model):
 def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
 
     if os_name == 'Windows':
-        datapath = '.\\src\\data'
+        datapath = cleandata + '\\data'
         gpu_name = 0
     else:
-        datapath = './src/data'
+        datapath = cleandata + '/data'
         gpu_name = 'mps'
 
     try: # gpu
@@ -175,7 +178,7 @@ def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
     pro_encoding_df = pd.DataFrame(people_candidates2, columns=['candidate2', 'embedding2'])
 
     start_date = start_date
-    df = read_csv('/Users/leegangju/Documents/GitHub/CleanData/data/testURL_youtube.csv')  ## 수정되어야 되는 부분.
+    df = read_csv(cleandata + '/data/testURL_youtube.csv')  ## 수정되어야 되는 부분.
 
 
 
@@ -184,16 +187,18 @@ def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
         & (df['total_len'] <= avi_length),:]
     tmp_df1.reset_index(drop=True, inplace=True)
 
-    ext_file2 = '/Users/leegangju/Documents/GitHub/CleanData/src/cjpalhdlnbpafiamejdnhcphjbkeiagm.crx'
+    ext_file2 = cleandata + '/src/cjpalhdlnbpafiamejdnhcphjbkeiagm.crx'
     
     if platform.system() =='Windows':
-        executable_path = '/Users/leegangju/Documents/GitHub/CleanData/src/chromedriver'
+        executable_path = cleandata + '/src/chromedriver.exe'
     else:
-        executable_path = '/Users/leegangju/Documents/GitHub/CleanData/src/chromedriver'
+        executable_path = cleandata + '/src/chromedriver'
 
     options = Options()
 
     options.add_extension(ext_file2)
+
+    print(executable_path)
 
     driver = webdriver.Chrome(executable_path=executable_path, chrome_options=options)
 

@@ -1,3 +1,4 @@
+import os
 import platform
 import pyautogui
 import cv2
@@ -10,6 +11,18 @@ from commons import functions, detected
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
+pwd = os.getcwd()
+
+os_name = platform.system()
+root = "/"
+
+if os_name == 'Windows':
+    root = "\\"
+
+pwd = os.getcwd()
+cleandata = root.join(pwd.split(root)[:-1])
+print("main.py pwd", pwd)
+print("main.py cleandata", cleandata)
 
 def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
     while True:
@@ -50,19 +63,16 @@ def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
         setting_btn_hd[0].click()
 
     id, is_vitim = display_df(driver=driver, url_name=url, dateString=dateString,
-                              encoding_df=encoding_df, pro_encoding_df=pro_encoding_df, model=model)
+                          encoding_df=encoding_df, pro_encoding_df=pro_encoding_df, model=model)
 
     return id, is_vitim
+
 
 
 #################################
 def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model):
     """
 
-    :param model:
-    :param dateString:
-    :param url_name:
-    :param driver:
     :parameter
         :param file_name: VideoCapture 실행 시킬 경로.
         :param encoding_df: encoding 된 dataframe 형태
@@ -79,15 +89,15 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
         screen = np.array(screen)
         src = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
         frameUnderTest = np.array(src)
-        print(ing_video, ":", dateString, "<< check >>")
-        if ing_video == dateString:
+        print(ing_video, ":",dateString, "<< check >>")
+        if ing_video==dateString:
             return None, False
 
         id, pro_act = detected.detectAndDisplay_yolo_df(frameUnderTest, encoding_df, pro_encoding_df, model)
         if id and not pro_act:
             if id in nomal_match_dit.keys():
                 nomal_match_dit[id] += 1
-            else:
+            else :
                 nomal_match_dit[id] = 1
             print(nomal_match_dit[id])
             if nomal_match_dit[id] == 15:
@@ -97,7 +107,7 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
         elif pro_act:
             if id in pro_match_dit.keys():
                 pro_match_dit[id] += 1
-            else:
+            else :
                 pro_match_dit[id] = 1
             print(pro_match_dit[id])
             if pro_match_dit[id] == 15:
@@ -108,8 +118,11 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return None, False
 
+
+
     cv2.destroyAllWindows()
     return None, False
+
 
 
 # 실행
@@ -119,16 +132,15 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
 def run(startDate):
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
     avi_length = 600
-    tmp_df1, driver, model, encoding_df, pro_encoding_df = \
+    tmp_df1, driver, model,  encoding_df, pro_encoding_df = \
         functions.default_set(os_name=platform.system(), start_date=startDate, avi_length=avi_length)
-
-    with open('./running.txt', 'w') as f:
+    
+    with open(cleandata+'/data/running.txt', 'w') as f:
         f.write('True')
     f.close()
-
+    
     for i, url in enumerate(tmp_df1['link']):
-        id, is_vitim = crawling_path(driver=driver, url=url, model=model, encoding_df=encoding_df,
-                                     pro_encoding_df=pro_encoding_df)  # 이름, 전문배우 (맞으면 True, 틀리면 False)
+        id, is_vitim = crawling_path(driver=driver, url=url, model=model, encoding_df=encoding_df, pro_encoding_df=pro_encoding_df) # 이름, 전문배우 (맞으면 True, 틀리면 False)
         if is_vitim:
             print(is_vitim, id)
             tmp_df1.loc[i, "pro_actor"] = is_vitim
@@ -136,9 +148,13 @@ def run(startDate):
         else:
             tmp_df1.loc[i, "id"] = id
     print(tmp_df1)
-
-    with open('./running.txt', 'w') as f:
+    
+    with open(cleandata+'/data/running.txt', 'w') as f:
         f.write('False')
-    f.close()
+    f.close()    
     # return tmp_df1
-    tmp_df1.to_csv('./result/answer.csv', index=False, encoding='UTF8')
+    tmp_df1.to_csv(cleandata+'/result/answer.csv', index=False, encoding='UTF8')
+
+
+
+
