@@ -14,16 +14,20 @@ from flask_restful import Api, Resource, reqparse
 from werkzeug.utils import secure_filename
 
 from deteted_model.main import run
+from deepface import DeepFace
+from deepface.detectors.FaceDetector import build_model
+from deteted_model.commons.yoloface.face_detector import YoloDetector
 
 app = Flask(__name__)
 app.secret_key = "secret key"
 
 os_name = platform.system()
 root = "/"
+gpu_name = 'mps'
 
 if os_name == 'Windows':
     root = "\\"
-
+    gpu_name = 0
 
 pwd = os.getcwd()
 cleandata = root.join(pwd.split(root)[:-1])
@@ -40,6 +44,24 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # 처리 가능한 파일확장자만 거를 수 있는 함수
 ALLOWED_EXTENSIONS = set(["png", "jpg", "jpeg", "gif", "mov", "mp4", "mpeg"])
+def initialize():
+    """
+    서버 시작시 모델을 미리 생성
+    :return:
+        model: Yolo model
+    """
+    try:  # gpu
+        model = YoloDetector(weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml',
+                             target_size=480, gpu=gpu_name)
+    except:  # cpu
+        model = YoloDetector(weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml',
+                             target_size=480, gpu=-1)
+    DeepFace.build_model("Facenet512")
+    build_model('mtcnn')
+    return model
+
+model=initialize()
+
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -124,7 +146,7 @@ def send_csvfile(img_owner):
     os.remove(cleandata+"/data/startDate.txt")
     
     # 딥러닝 모델 작동
-    run(earliest_date)
+    run(earliest_date, model)
 
     # 모델 종료.
     f = open(cleandata+"/data/running.txt", "w")

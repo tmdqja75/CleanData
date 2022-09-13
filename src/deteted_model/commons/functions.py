@@ -153,8 +153,9 @@ def embeded_file(datapath, model, target="target", pro=False):
     return rb
 
 
-def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
+def default_set(model, os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
     """
+    :param model: YoLo model
     :param os_name: platform.system() 으로 받아온 os name
     :param start_date: user가 입력한 datetime
     :param avi_length: 영상의 길이
@@ -164,23 +165,13 @@ def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
     :return:
         tmp_df1: time, pro_actor, length로 정제된 DataFrame <br/>
          driver: Webdriver<br/>
-          model: Yolov5 model<br/>
        encoding_df: target DataFrame<br/>
         pro_encoding_df: pro_actor DataFrame
     """
     datapath = cleandata + '/data'
-    gpu_name = 'mps'
 
     if os_name == 'Windows':
         datapath = cleandata + '\\data'
-        gpu_name = 0
-
-    try: # gpu
-        model = YoloDetector(weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml',
-                             target_size=480, gpu=gpu_name)
-    except: # cpu
-        model = YoloDetector(weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml',
-                             target_size=480, gpu=-1)
 
     rb = embeded_file(datapath=datapath, target="target", pro=False, model=model) # add deteted_model
     pro_rb = embeded_file(datapath=datapath, target="AvList", pro=True, model=model) # add deteted_model
@@ -212,8 +203,6 @@ def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
     start_date = start_date
     df = read_csv(cleandata + '/data/testURL_youtube.csv')  ## 수정되어야 되는 부분.
 
-
-
     tmp_df1 = df.loc[
         (df['upload_date'] >= start_date) & (df['pro_actor'] == False)
         & (df['total_len'] <= avi_length),:]
@@ -234,6 +223,6 @@ def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
 
     driver = webdriver.Chrome(executable_path=executable_path, chrome_options=options)
 
-    return tmp_df1, driver, model, encoding_df, pro_encoding_df
+    return tmp_df1, driver, encoding_df, pro_encoding_df
 
 

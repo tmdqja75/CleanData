@@ -145,18 +145,18 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
 # CleanData 폴더에서 실행할것.
 # python ./face_recognition/main.py
 # if __name__ == '__main__':
-def run(startDate):
+def run(startDate, model):
     """
     :param startDate: 날짜 값을 받음
+    :param model: YOLO Model
     startDate format is "2018-01-01"
     :return:
         None
     """
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
     avi_length = 600
-    tmp_df1, driver, model,  encoding_df, pro_encoding_df = \
-        functions.default_set(os_name=platform.system(), start_date=startDate, avi_length=avi_length)
-    
+    tmp_df1, driver, encoding_df, pro_encoding_df = \
+        functions.default_set(model=model, os_name=platform.system(), start_date=startDate, avi_length=avi_length)
     with open(cleandata+'/data/running.txt', 'w') as f:
         f.write('True')
     f.close()
