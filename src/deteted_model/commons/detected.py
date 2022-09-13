@@ -11,11 +11,10 @@ detector_backend = 'skip'  # fix mtcnn -> yolo(skip)
 
 def splitData(obj):
     """
+    :param obj:3차원으로 된 리스트
     받아온 얼굴 사진을 인코딩 및 좌표 처리 해주는 함수
-    :param:
-        obj(list):3차원으로 된 리스트
     :return:
-        encodings(list):사진의 얼굴 부분의 값을 추출해 2중 list [[emb1],[emb2], ... ]
+        encodings(list):사진의 얼굴 부분의 값을 추출해 2중 list [[emb1],[emb2], ... ] <br/>
         boxes(list): 사진의 얼굴 부분의 좌표 값 2중 list [[startX, startY, endX, endY], ... ]
     """
     encodings = []
@@ -51,13 +50,13 @@ def findDistance(target, compare):
 
 def detectAndDisplay_yolo_df(image, df, pro_df, model):
     """
+    :param image: frame 사진 한장
+    :param df: dataframe 된 고객 사진
+    :param pro_df: pro data in DataFrame
+
     이미지에 그림을 그려주며 판단해 주는 함수.
-    :parameter
-        :param image: frame 사진 한장
-        :param df: dataframe 된 고객 사진
-        :param pro_df: pro data in DataFrame
-    :return
-        :(name, bool)
+
+    :return:match_check(name, bool)
     """
     # --------time check-------- #
     start_time = time.time()
@@ -122,9 +121,9 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
     print(f'Detection took {detection_time} seconds')
     print(f'Comparison takes {process_time - detection_time} seconds')
     # --------time check-------- #
-    image = cv2.resize(src=image, dsize=(600, 400))
+    image = cv2.resize(src=image, dsize=(800, 600))
     cv2.namedWindow("frame", flags=cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("frame", width=600, height=400)
+    cv2.resizeWindow("frame", width=800, height=600)
     cv2.imshow("frame", image)
 
     return match_check

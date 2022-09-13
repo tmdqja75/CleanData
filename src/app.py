@@ -66,7 +66,7 @@ def image_api():
     if running=='True':
         # return {"message": "Face Detection is in Progress"}
         requests.post('http://localhost:8080/image/receive', "Face Detection is in Progress")
-        return
+        return {"message": "The model is already run"}
         
     # 사진 소유자 email과 영상 생성 시점 받이오기
     img_owner = request.form['userEmail']

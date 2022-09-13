@@ -1,6 +1,6 @@
 # facedetect
 
-## v1.0.0
+## v1.1.0
 1. zip 파일 [다운로드](https://drive.google.com/file/d/1xtowuN7dZRAzPMpLzpb2lmwInq6zkrBD/view?usp=sharing)
   - 모든 과정을 확인
     - data 폴더에 AvList와 target 압축 해제후 해당 경로처럼 파일 넣기

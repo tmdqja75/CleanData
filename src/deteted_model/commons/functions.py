@@ -53,6 +53,12 @@ def make_pickle(emb_dic, datapath, pro):
 
 
 def time_second(strtime):
+    """
+    :param: strtime(string)
+    str to int \n
+    ex) str(12:34) -> int(754)
+    :return: total_time(int)
+    """
     split_time=strtime.split(":")
     total_time = 0
     for i, time in enumerate(split_time[::-1]):
@@ -63,33 +69,46 @@ def time_second(strtime):
 def rm_dir(paths):  # 파일 삭제.
     """
     파일을 삭제해 주는 함수
-    :parameter:
-        paths (list): 빈 파일을 한번에 지워주기 위해서 만든 기능
-    :return:
-        None
+    :param paths(list): empty dir list
+
+    파일 경로를 받아 해당 파일이 비어있으면 지워준다. \n
+    파일 안에 아직 문서가 있으면
+
+    :return
+        no_dir(list) no empty dir list
     """
+    no_dir = []
     for path in paths:
         path = root.join(path.split(root)[:-1]) + root
         try:
             os.rmdir(path)
         except:
-            continue
-
+            no_dir.append(path)
+    return no_dir
 
 def read_csv(path): # "./testURL_youtube.csv"
+    """
+    :param path: url 경로
+    DataFrame 및 날짜 format 변경
+    :return:
+    """
     df_youtube = pd.read_csv(path)
     df_youtube['upload_date'] = pd.to_datetime(df_youtube['upload_date'], format="%Y%m")
     df_youtube['total_len'] = df_youtube['total_len'].map(time_second)
     return df_youtube
 
 
-def embeded_file(datapath, target, pro, model):
+def embeded_file(datapath, model, target="target", pro=False):
     """
-    이미지를 embed 해주고 삭제해 주는 함수.
-    :param
-        datapath(string):기본 경로
-    :return
-        rb(dictionary):{id:[[emb_data1], [emb_data2], ...], id2:[[emb_data1], [emb_data2], ...], ...}
+    :param datapath: main directory root
+    :param model: model
+    :param target: pro_act = "AvList", user = "target"
+    :param pro: pro_act = True, user = False
+
+    경로에 있는 사진을 받아와 file name 으로 dictionary 형태로 반환해주는 함수.
+
+    :return:
+        rb(dictionary): {d_name:{embedding, ...}}
     """
     img_path_list = []
     img_path_list.extend(glob(os.path.join(datapath, f'{target}/*/*.*')))
@@ -135,13 +154,26 @@ def embeded_file(datapath, target, pro, model):
 
 
 def default_set(os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
+    """
+    :param os_name: platform.system() 으로 받아온 os name
+    :param start_date: user가 입력한 datetime
+    :param avi_length: 영상의 길이
+
+    os flatform 및 gpu 유,무로 환경 setting
+
+    :return:
+        tmp_df1: time, pro_actor, length로 정제된 DataFrame <br/>
+         driver: Webdriver<br/>
+          model: Yolov5 model<br/>
+       encoding_df: target DataFrame<br/>
+        pro_encoding_df: pro_actor DataFrame
+    """
+    datapath = cleandata + '/data'
+    gpu_name = 'mps'
 
     if os_name == 'Windows':
         datapath = cleandata + '\\data'
         gpu_name = 0
-    else:
-        datapath = cleandata + '/data'
-        gpu_name = 'mps'
 
     try: # gpu
         model = YoloDetector(weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml',

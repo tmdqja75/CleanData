@@ -24,6 +24,19 @@ print("main.py pwd", pwd)
 print("main.py cleandata", cleandata)
 
 def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
+    """
+    :param driver: chromedriver
+    :param url: url
+    :param model: YOLO v5
+    :param encoding_df: DataFrame
+    :param pro_encoding_df: DataFrame
+
+    auto web surfing, crop and connect display function
+
+    :return:
+        id: user_email <br/>
+        isvitim: bool
+    """
     while True:
         driver.get(url)
         a = driver.current_url
@@ -61,6 +74,7 @@ def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
     elif setting_btn_hd:
         setting_btn_hd[0].click()
 
+    # detected person face
     id, is_vitim = display_df(driver=driver, url_name=url, dateString=dateString,
                           encoding_df=encoding_df, pro_encoding_df=pro_encoding_df, model=model)
 
@@ -71,13 +85,18 @@ def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
 #################################
 def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model):
     """
+    :param driver: webdriver
+    :param url_name: url link
+    :param dateString: Total video time
+    :param encoding_df: DataFrame
+    :param pro_encoding_df: DataFrame
+    :param model: YOLOv5
 
-    :parameter
-        :param file_name: VideoCapture 실행 시킬 경로.
-        :param encoding_df: encoding 된 dataframe 형태
-        :param pro_encoding_df: encoding 된 전문 배우
+    화면을 캡처하여 detect 실시
+
     :return:
-        :param
+        id: 해당 동영상 얼굴에 매칭되는 id 값 <br/>
+        bool: pro_actor에 해당되면 True
     """
     nomal_match_dit = {}
     pro_match_dit = {}
@@ -117,8 +136,6 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return None, False
 
-
-
     cv2.destroyAllWindows()
     return None, False
 
@@ -129,6 +146,12 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
 # python ./face_recognition/main.py
 # if __name__ == '__main__':
 def run(startDate):
+    """
+    :param startDate: 날짜 값을 받음
+    startDate format is "2018-01-01"
+    :return:
+        None
+    """
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
     avi_length = 600
     tmp_df1, driver, model,  encoding_df, pro_encoding_df = \
@@ -139,7 +162,8 @@ def run(startDate):
     f.close()
     
     for i, url in enumerate(tmp_df1['link']):
-        id, is_vitim = crawling_path(driver=driver, url=url, model=model, encoding_df=encoding_df, pro_encoding_df=pro_encoding_df) # 이름, 전문배우 (맞으면 True, 틀리면 False)
+        id, is_vitim = crawling_path(driver=driver, url=url, model=model,
+                                     encoding_df=encoding_df, pro_encoding_df=pro_encoding_df) # 이름, 전문배우 (맞으면 True, 틀리면 False)
         if is_vitim:
             print(is_vitim, id)
             tmp_df1.loc[i, "pro_actor"] = is_vitim
