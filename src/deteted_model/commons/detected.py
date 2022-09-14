@@ -56,14 +56,15 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
 
     이미지에 그림을 그려주며 판단해 주는 함수.
 
-    :return:match_check(name, bool)
+    :return:match_check[(name, bool), ...]
     """
     # --------time check-------- #
     start_time = time.time()
     face_detect_tic = time.time()
     # --------time check-------- #
 
-    match_check = (None, False)
+
+    names = []
 
     # ---------YOLOv5 적용 코드 -------------
     bboxes, _ = model.predict(image) # [[[432, 134, 545, 280], [72, 221, 171, 358], [209, 225, 314, 357],...]]
@@ -75,11 +76,16 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
 
     face_detect_toc = time.time()
 
+    match_check = []
+
     if len(bboxes) > 0:
+
         for i in range(len(bboxes)):
+            best_distance, best_distance_pro = 1, 1
+
             x, y, x_h, y_h = bboxes[i]
             imcrop = image[y:y_h + 1, x:x_h + 1, :]
-
+            check = (None, False)
             frame_encoding = DeepFace.represent(img_path=imcrop, model_name=model_name,
                                                 detector_backend=detector_backend, enforce_detection=False)
 
@@ -99,17 +105,18 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
 
             color = (0, 255, 0)
             name = None
+            if best_distance < best_distance_pro:
+                if best_distance <= threshold:
+                    color = (255, 0, 0)
+                    name = final_name
+                    check = (name, False)
+            else:
+                if best_distance_pro <= threshold:
+                    color = (255, 0, 0)
+                    name = final_name_pro
+                    check = (name, True)
 
-            if best_distance <= threshold:
-                color = (255, 0, 0)
-                name = final_name
-                match_check = (name, False)
-
-            if best_distance_pro <= threshold:
-                color = (255, 0, 0)
-                name = final_name_pro
-                match_check = (name, True)
-
+            match_check.append(check)
             cv2.rectangle(image, (x, y), (x_h, y_h), color, 2)
             cv2.putText(image, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
 
