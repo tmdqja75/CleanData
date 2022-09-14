@@ -14,6 +14,7 @@ deepface==0.0.75
 filelock==3.8.0
 fire==0.4.0
 Flask==2.2.2
+flask_restful==0.3.8
 flatbuffers==1.12
 fonttools==4.37.1
 gast==0.4.0

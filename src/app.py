@@ -13,17 +13,21 @@ from flask import (Flask, abort, current_app, request, send_file,
 from flask_restful import Api, Resource, reqparse
 from werkzeug.utils import secure_filename
 
-from main import run
+from deteted_model.main import run
+from deepface import DeepFace
+from deepface.detectors.FaceDetector import build_model
+from deteted_model.commons.yoloface.face_detector import YoloDetector
 
 app = Flask(__name__)
 app.secret_key = "secret key"
 
 os_name = platform.system()
 root = "/"
+gpu_name = 'mps'
 
 if os_name == 'Windows':
     root = "\\"
-
+    gpu_name = 0
 
 pwd = os.getcwd()
 cleandata = root.join(pwd.split(root)[:-1])
@@ -40,6 +44,24 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # 처리 가능한 파일확장자만 거를 수 있는 함수
 ALLOWED_EXTENSIONS = set(["png", "jpg", "jpeg", "gif", "mov", "mp4", "mpeg"])
+def initialize():
+    """
+    서버 시작시 모델을 미리 생성
+    :return:
+        model: Yolo model
+    """
+    try:  # gpu
+        model = YoloDetector(weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml',
+                             target_size=480, gpu=gpu_name)
+    except:  # cpu
+        model = YoloDetector(weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml',
+                             target_size=480, gpu=-1)
+    DeepFace.build_model("Facenet512")
+    build_model('mtcnn')
+    return model
+
+model=initialize()
+
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -66,7 +88,7 @@ def image_api():
     if running=='True':
         # return {"message": "Face Detection is in Progress"}
         requests.post('http://localhost:8080/image/receive', "Face Detection is in Progress")
-        return
+        return {"message": "The model is already run"}
         
     # 사진 소유자 email과 영상 생성 시점 받이오기
     img_owner = request.form['userEmail']
@@ -106,14 +128,12 @@ def image_api():
     print(type(msg))
     requests.post('http://localhost:8080/image/receive', data=msg)
     # return {"message": "File(s) successfully uploaded"}
-    resultData = send_csvfile()
-    print("line 111: type", type(resultData))
-    print(request.content_type)
-    requests.post('http://localhost:8080/image/result', json=resultData)
+    resultData = send_csvfile(img_owner)
+    requests.post('http://localhost:8080/image/result', json=dict(resultData))
     return {"message": "File(s) successfully uploaded"}
 
 
-def send_csvfile():
+def send_csvfile(img_owner):
     # 피해자 리스트 중에 영상 시작일이 가장 일찍인 영상 시점 찾기
     datelist = []
     f_date = open(os.path.join(app.config['UPLOAD_FOLDER'], 'startDate.txt'))
@@ -126,7 +146,7 @@ def send_csvfile():
     os.remove(cleandata+"/data/startDate.txt")
     
     # 딥러닝 모델 작동
-    run(earliest_date)
+    run(earliest_date, model)
 
     # 모델 종료.
     f = open(cleandata+"/data/running.txt", "w")
@@ -136,28 +156,28 @@ def send_csvfile():
     # ---결과 읽어오기---
     PATH = os.path.join(cleandata, "result", 'answer.csv')
     df_result = pd.read_csv(PATH)
-    result = df_result[df_result['등장인물']=='정답영상']
-    
+    # result = df_result[df_result['등장인물']=='정답영상']
+    result = df_result.dropna(axis=0)
     list_client = list(result.id.unique())
     #-----------------
     
     # ---결과값 json formatting 결과 dict형식으로 준비---
     return_dict = dict()
-    return_dict["total_inspected_video_count"] = len(result)
-    return_dict['result'] = []
-    
-    print(list_client)
+    return_dict["total_inspected_video_count"] = str(len(result)) # 검색한 결과
+    return_dict["result"] = []
+
     for client in list_client:
-        client_dict = dict()
-        client_dict['requested_user_email'] = client
-        client_dict['urls'] = result[result['id']==client]['link'].to_list()
-        return_dict['result'].append(client_dict)
+        if img_owner == client:
+            client_dict = dict()
+            client_dict["requested_user_email"] = client
+            client_dict["urls"] = result[result["id"]==client]["link"].to_list()
+            return_dict["result"].append(client_dict)
     #------------------------------------------------
     
     # 내보낼 결과값 json 형식으로 변형
-    return_json = json.dumps(return_dict, indent=2)
-    print(return_json, type(return_json))
-    return return_json
+    # return_json = json.dumps(return_dict, indent=2)
+    # print(return_json, type(return_json))
+    return return_dict
 @app.post("/image/tojson")
 def send_json(returnJson):
     return returnJson
