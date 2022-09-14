@@ -43,7 +43,7 @@ def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
         print(a)
         if a != "data:,":
             break
-    ti.sleep(5)
+    ti.sleep(3)
 
     try:
         player_btn = driver.find_element(by=By.XPATH, value='//button[@class="ytp-large-play-button ytp-button"]')
@@ -129,7 +129,7 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
                 else :
                     pro_match_dit[id] = 1
                 print(pro_match_dit[id], f"ipro_id={id}")
-                if pro_match_dit[id] == 15:
+                if pro_match_dit[id] == 25:
                     print(f'this pro actor url: {url_name} id={id}')
                     return id, True
             else:
