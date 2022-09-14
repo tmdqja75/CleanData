@@ -1,6 +1,10 @@
-link,upload_date,등장인물,pro_actor,id,total_len
-https://www.youtube.com/watch?v=fUjuy3xASDc,2022-08-01,eimi_fukada,False,,593
-https://www.youtube.com/watch?v=_GPN_xkf0aA,2022-08-01,Meg_Fujiura,False,,170
-https://www.youtube.com/watch?v=zqCPkdN5rik,2022-09-01,mikami_yua,False,,192
-https://www.youtube.com/watch?v=llB_mu2Wz2g,2022-09-01,다수인원 등장,False,,62
-https://www.youtube.com/watch?v=yvCP6_pXjAk,2022-08-01,정답영상,False,,286
+link,upload_date,pro_actor,total_len,id,answer
+https://www.youtube.com/watch?v=fUjuy3xASDc,2022-08-01,True,593,Eimi_Fukada,eimi_fukada
+https://www.youtube.com/watch?v=JlbEULIZ_Ik,2022-07-01,True,241,shimiken@yahoo.co.jp,Ken Shimizu
+https://youtu.be/DFkXkF3W_Wo?t=59,2022-07-01,False,461,charles@gmail.com,charles@gamil.com
+https://www.youtube.com/watch?v=_GPN_xkf0aA,2022-08-01,True,170,Meguri_(Mugu_Fujiura),Meg_Fujiura
+https://youtu.be/emG1ooM8xh0,2022-08-01,False,338,rockeee@gmail.com,rockeee@gmail.com
+https://www.youtube.com/watch?v=zqCPkdN5rik,2022-09-01,True,192,Yua_Mikami,mikami_yua
+https://www.youtube.com/watch?v=yvCP6_pXjAk,2022-07-01,True,286,kirara@yahoo.co.jp,Kirara_Asuka
+https://www.youtube.com/watch?v=llB_mu2Wz2g,2022-09-01,False,62,,
+https://youtu.be/wgltybkxHEA?t=15,2022-09-01,False,461,charles@gmail.com,charles@gamil.com
