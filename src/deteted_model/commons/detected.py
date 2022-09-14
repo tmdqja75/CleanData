@@ -79,7 +79,10 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
     match_check = []
 
     if len(bboxes) > 0:
+
         for i in range(len(bboxes)):
+            best_distance, best_distance_pro = 1, 1
+
             x, y, x_h, y_h = bboxes[i]
             imcrop = image[y:y_h + 1, x:x_h + 1, :]
             check = (None, False)
@@ -102,16 +105,16 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
 
             color = (0, 255, 0)
             name = None
-
-            if best_distance <= threshold:
-                color = (255, 0, 0)
-                name = final_name
-                check = (name, False)
-
-            if best_distance_pro <= threshold:
-                color = (255, 0, 0)
-                name = final_name_pro
-                check = (name, True)
+            if best_distance < best_distance_pro:
+                if best_distance <= threshold:
+                    color = (255, 0, 0)
+                    name = final_name
+                    check = (name, False)
+            else:
+                if best_distance_pro <= threshold:
+                    color = (255, 0, 0)
+                    name = final_name_pro
+                    check = (name, True)
 
             match_check.append(check)
             cv2.rectangle(image, (x, y), (x_h, y_h), color, 2)
