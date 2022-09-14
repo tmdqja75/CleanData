@@ -111,28 +111,29 @@ def display_df(driver, url_name, dateString, encoding_df, pro_encoding_df, model
         if ing_video==dateString:
             return None, False
 
-        id, pro_act = detected.detectAndDisplay_yolo_df(frameUnderTest, encoding_df, pro_encoding_df, model)
-        if id and not pro_act:
-            if id in nomal_match_dit.keys():
-                nomal_match_dit[id] += 1
-            else :
-                nomal_match_dit[id] = 1
-            print(nomal_match_dit[id])
-            if nomal_match_dit[id] == 15:
-                print("!!!catch!!!")
-                return id, False
+        match_list = detected.detectAndDisplay_yolo_df(frameUnderTest, encoding_df, pro_encoding_df, model)
+        for id, pro_act in match_list:
+            if id and not pro_act:
+                if id in nomal_match_dit.keys():
+                    nomal_match_dit[id] += 1
+                else :
+                    nomal_match_dit[id] = 1
+                print(nomal_match_dit[id], f"id={id}")
+                if nomal_match_dit[id] == 15:
+                    print("!!!catch!!!")
+                    return id, False
 
-        elif pro_act:
-            if id in pro_match_dit.keys():
-                pro_match_dit[id] += 1
-            else :
-                pro_match_dit[id] = 1
-            print(pro_match_dit[id])
-            if pro_match_dit[id] == 15:
-                print(f'this pro actor url: {url_name} id={id}')
-                return id, True
-        else:
-            pass
+            elif pro_act:
+                if id in pro_match_dit.keys():
+                    pro_match_dit[id] += 1
+                else :
+                    pro_match_dit[id] = 1
+                print(pro_match_dit[id], f"ipro_id={id}")
+                if pro_match_dit[id] == 15:
+                    print(f'this pro actor url: {url_name} id={id}')
+                    return id, True
+            else:
+                pass
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return None, False
 

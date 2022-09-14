@@ -178,9 +178,17 @@ def send_csvfile(img_owner):
     # return_json = json.dumps(return_dict, indent=2)
     # print(return_json, type(return_json))
     return return_dict
-@app.post("/image/tojson")
-def send_json(returnJson):
-    return returnJson
+@app.route("/image/toCsv", methods=['GET'])
+def send_json():
+    url = 'http://localhost:8080/image/downCsv'
+    # headers = {'accept':'application/json'}
+    PATH = os.path.join(cleandata, "result", 'answer.csv')
+    head = {'content-type':'text/csv'}
+    files = {'answer.csv':open(PATH, 'r', encoding='utf8')}
+
+    r = requests.post(url, files=files, headers=head)
+    print(r.request.body)
+    return {"message":"csv send done"}
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)

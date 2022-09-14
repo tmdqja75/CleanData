@@ -128,7 +128,7 @@ def embeded_file(datapath, model, target="target", pro=False):
         frame_copy = np.array(frame)
         yb = bboxes
 
-
+        print(len(yb), img_path)
         if len(yb) >= 2:
             continue
 
