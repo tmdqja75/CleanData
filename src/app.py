@@ -17,9 +17,11 @@ from deteted_model.main import run
 from deepface import DeepFace
 from deepface.detectors.FaceDetector import build_model
 from deteted_model.commons.yoloface.face_detector import YoloDetector
+from conn_db.conn import Conn
 
 app = Flask(__name__)
 app.secret_key = "secret key"
+
 
 os_name = platform.system()
 root = "/"
@@ -132,6 +134,16 @@ def image_api():
     requests.post('http://localhost:8080/image/result', json=dict(resultData))
     return {"message": "File(s) successfully uploaded"}
 
+def df2dict(dataframe, target):
+    ans = {}
+    df1 = dataframe.loc[dataframe['id']==target]
+    urls = [url for url in df1['link']]
+    ans['id'] = 0
+    ans['videoCount'] = len(dataframe)
+    ans['detectCount'] = len(df1)
+    ans['userEmail'] = target
+    ans['urlList'] = str(urls)
+    return ans
 
 def send_csvfile(img_owner):
     # 피해자 리스트 중에 영상 시작일이 가장 일찍인 영상 시점 찾기
@@ -158,9 +170,18 @@ def send_csvfile(img_owner):
     df_result = pd.read_csv(PATH)
     # result = df_result[df_result['등장인물']=='정답영상']
     result = df_result.dropna(axis=0)
-    list_client = list(result.id.unique())
     #-----------------
-    
+
+    # csv to db
+    list_client = [x for x in result.id.unique() if x not in "@"]
+    list_pro_actor = [x for x in result.id.unique() if x not in "@"]
+    conn1 = Conn('root', 'root')
+    for client in list_client:
+        data = df2dict(dataframe=result, target=client)
+        df = pd.DataFrame(data=data, index=[0])
+        conn1.df2resultdata(df)
+    # 아래 내용이 필요 없음.
+
     # ---결과값 json formatting 결과 dict형식으로 준비---
     return_dict = dict()
     return_dict["total_inspected_video_count"] = str(len(result)) # 검색한 결과
