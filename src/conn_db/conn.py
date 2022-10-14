@@ -6,7 +6,7 @@ class Conn:
     def __init__(self, id, pwd, host='localhost', name='catchvdatabase'):
         self.db_cfg = dict()
         self.db_cfg['db_id'] = id
-        self.db_cfg['db_pwd'] = id
+        self.db_cfg['db_pwd'] = pwd
         self.db_cfg['db_host'] = host
         self.db_cfg['db_name'] = name
         self.conn = self.conn_db()
