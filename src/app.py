@@ -126,12 +126,11 @@ def image_api():
             filename = str(uuid.uuid1()) + "." + extension
 
             f.save(os.path.join(file_path, filename))
-    msg = "File(s) successfully uploaded"
-    print(type(msg))
-    requests.post('http://localhost:8080/image/receive', data=msg)
+
     # return {"message": "File(s) successfully uploaded"}
-    resultData = send_csvfile(img_owner)
-    requests.post('http://localhost:8080/image/result', json=dict(resultData))
+    # resultData = send_csvfile(img_owner)
+    send_csvfile(img_owner)
+    # requests.post('http://localhost:8080/image/result', json=dict(resultData))
     return {"message": "File(s) successfully uploaded"}
 
 def df2dict(dataframe, target):
@@ -156,7 +155,8 @@ def send_csvfile(img_owner):
     earliest_date = min(datelist)
     f_date.close()
     os.remove(cleandata+"/data/startDate.txt")
-    
+
+    #
     # 딥러닝 모델 작동
     run(earliest_date, model)
 
@@ -175,7 +175,7 @@ def send_csvfile(img_owner):
     # csv to db
     list_client = [x for x in result.id.unique() if x not in "@"]
     list_pro_actor = [x for x in result.id.unique() if x not in "@"]
-    conn1 = Conn('root', 'root')
+    conn1 = Conn(id='root', pwd='root') # id, pwd 변경
     for client in list_client:
         data = df2dict(dataframe=result, target=client)
         df = pd.DataFrame(data=data, index=[0])
@@ -183,22 +183,22 @@ def send_csvfile(img_owner):
     # 아래 내용이 필요 없음.
 
     # ---결과값 json formatting 결과 dict형식으로 준비---
-    return_dict = dict()
-    return_dict["total_inspected_video_count"] = str(len(result)) # 검색한 결과
-    return_dict["result"] = []
-
-    for client in list_client:
-        if img_owner == client:
-            client_dict = dict()
-            client_dict["requested_user_email"] = client
-            client_dict["urls"] = result[result["id"]==client]["link"].to_list()
-            return_dict["result"].append(client_dict)
+    # return_dict = dict()
+    # return_dict["total_inspected_video_count"] = str(len(result)) # 검색한 결과
+    # return_dict["result"] = []
+    #
+    # for client in list_client:
+    #     if img_owner == client:
+    #         client_dict = dict()
+    #         client_dict["requested_user_email"] = client
+    #         client_dict["urls"] = result[result["id"]==client]["link"].to_list()
+    #         return_dict["result"].append(client_dict)
     #------------------------------------------------
     
     # 내보낼 결과값 json 형식으로 변형
     # return_json = json.dumps(return_dict, indent=2)
     # print(return_json, type(return_json))
-    return return_dict
+    # return return_dict
 @app.route("/image/toCsv", methods=['GET'])
 def send_json():
     url = 'http://localhost:8080/image/downCsv'
@@ -210,6 +210,14 @@ def send_json():
     r = requests.post(url, files=files, headers=head)
     print(r.request.body)
     return {"message":"csv send done"}
+
+# 진행중일때. 알림 표시.
+@app.route('/image/running', methods=['GET'])
+def runnuing():
+    f = open(cleandata + "/data/running.txt", "r")
+    msg = f.read()
+    f.close()
+    return {"message":msg} # java 161 참고.
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
