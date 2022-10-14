@@ -167,7 +167,7 @@ class WandbLogger():
     def download_model_artifact(self, opt):
         if opt.resume.startswith(WANDB_ARTIFACT_PREFIX):
             model_artifact = wandb.use_artifact(remove_prefix(opt.resume, WANDB_ARTIFACT_PREFIX) + ":latest")
-            assert model_artifact is not None, 'Error: W&B deteted_model artifact doesn\'t exist'
+            assert model_artifact is not None, 'Error: W&B detected_model artifact doesn\'t exist'
             modeldir = model_artifact.download()
             epochs_trained = model_artifact.metadata.get('epochs_trained')
             total_epochs = model_artifact.metadata.get('total_epochs')
@@ -177,7 +177,7 @@ class WandbLogger():
         return None, None
 
     def log_model(self, path, opt, epoch, fitness_score, best_model=False):
-        model_artifact = wandb.Artifact('run_' + wandb.run.id + '_model', type='deteted_model', metadata={
+        model_artifact = wandb.Artifact('run_' + wandb.run.id + '_model', type='detected_model', metadata={
             'original_url': str(path),
             'epochs_trained': epoch + 1,
             'save period': opt.save_period,
@@ -188,7 +188,7 @@ class WandbLogger():
         model_artifact.add_file(str(path / 'last.pt'), name='last.pt')
         wandb.log_artifact(model_artifact,
                            aliases=['latest', 'epoch ' + str(self.current_epoch), 'best' if best_model else ''])
-        print("Saving deteted_model artifact on epoch ", epoch + 1)
+        print("Saving detected_model artifact on epoch ", epoch + 1)
 
     def log_dataset_artifact(self, data_file, single_cls, project, overwrite_config=False):
         with open(data_file) as f:

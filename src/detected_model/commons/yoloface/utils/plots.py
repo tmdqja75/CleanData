@@ -89,7 +89,7 @@ def plot_wh_methods():  # from utils.plots import *; plot_wh_methods()
 
 
 def output_to_target(output):
-    # Convert deteted_model output to target format [batch_id, class_id, x, y, w, h, conf]
+    # Convert detected_model output to target format [batch_id, class_id, x, y, w, h, conf]
     targets = []
     for i, o in enumerate(output):
         for *box, conf, cls in o.cpu().numpy():

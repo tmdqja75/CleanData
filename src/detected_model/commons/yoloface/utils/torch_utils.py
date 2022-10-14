@@ -150,7 +150,7 @@ def find_modules(model, mclass=nn.Conv2d):
 
 
 def sparsity(model):
-    # Return global deteted_model sparsity
+    # Return global detected_model sparsity
     a, b = 0., 0.
     for p in model.parameters():
         a += p.numel()
@@ -159,9 +159,9 @@ def sparsity(model):
 
 
 def prune(model, amount=0.3):
-    # Prune deteted_model to requested global sparsity
+    # Prune detected_model to requested global sparsity
     import torch.nn.utils.prune as prune
-    print('Pruning deteted_model... ', end='')
+    print('Pruning detected_model... ', end='')
     for name, m in model.named_modules():
         if isinstance(m, nn.Conv2d):
             prune.l1_unstructured(m, name='weight', amount=amount)  # prune
@@ -217,10 +217,10 @@ def model_info(model, verbose=False, img_size=640):
 
 
 def load_classifier(name='resnet101', n=2):
-    # Loads a pretrained deteted_model reshaped to n-class output
+    # Loads a pretrained detected_model reshaped to n-class output
     model = torchvision.models.__dict__[name](pretrained=True)
 
-    # ResNet deteted_model properties
+    # ResNet detected_model properties
     # input_size = [3, 224, 224]
     # input_space = 'RGB'
     # input_range = [0, 1]
@@ -259,18 +259,18 @@ def copy_attr(a, b, include=(), exclude=()):
 
 class ModelEMA:
     """ Model Exponential Moving Average from https://github.com/rwightman/pytorch-image-models
-    Keep a moving average of everything in the deteted_model state_dict (parameters and buffers).
+    Keep a moving average of everything in the detected_model state_dict (parameters and buffers).
     This is intended to allow functionality like
     https://www.tensorflow.org/api_docs/python/tf/train/ExponentialMovingAverage
     A smoothed version of the weights is necessary for some training schemes to perform well.
-    This class is sensitive where it is initialized in the sequence of deteted_model init,
+    This class is sensitive where it is initialized in the sequence of detected_model init,
     GPU assignment and distributed training wrappers.
     """
 
     def __init__(self, model, decay=0.9999, updates=0):
         # Create EMA
         self.ema = deepcopy(model.module if is_parallel(model) else model).eval()  # FP32 EMA
-        # if next(deteted_model.parameters()).device.type != 'cpu':
+        # if next(detected_model.parameters()).device.type != 'cpu':
         #     self.ema.half()  # FP16 EMA
         self.updates = updates  # number of EMA updates
         self.decay = lambda x: decay * (1 - math.exp(-x / 2000))  # decay exponential ramp (to help early epochs)
@@ -283,7 +283,7 @@ class ModelEMA:
             self.updates += 1
             d = self.decay(self.updates)
 
-            msd = model.module.state_dict() if is_parallel(model) else model.state_dict()  # deteted_model state_dict
+            msd = model.module.state_dict() if is_parallel(model) else model.state_dict()  # detected_model state_dict
             for k, v in self.ema.state_dict().items():
                 if v.dtype.is_floating_point:
                     v *= d

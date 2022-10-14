@@ -1,7 +1,7 @@
 # parameters
 nc: 1  # number of classes
-depth_multiple: 0.67  # deteted_model depth multiple
-width_multiple: 0.75  # layer channel multiple
+depth_multiple: 1.0  # detected_model depth multiple
+width_multiple: 1.0  # layer channel multiple
 
 # anchors
 anchors:

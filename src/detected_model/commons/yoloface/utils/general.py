@@ -556,8 +556,8 @@ def strip_optimizer(f='weights/best.pt', s=''):  # from utils.general import *; 
     for key in 'optimizer', 'training_results', 'wandb_id':
         x[key] = None
     x['epoch'] = -1
-    x['deteted_model'].half()  # to FP16
-    for p in x['deteted_model'].parameters():
+    x['detected_model'].half()  # to FP16
+    for p in x['detected_model'].parameters():
         p.requires_grad = False
     torch.save(x, s or f)
     mb = os.path.getsize(s or f) / 1E6  # filesize

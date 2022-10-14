@@ -113,14 +113,14 @@ class LandmarksLoss(nn.Module):
         return loss / (torch.sum(mask) + 10e-14)
 
 
-def compute_loss(p, targets, model):  # predictions, targets, deteted_model
+def compute_loss(p, targets, model):  # predictions, targets, detected_model
     device = targets.device
     lcls, lbox, lobj, lmark = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
     tcls, tbox, indices, anchors, tlandmarks, lmks_mask = build_targets(p, targets, model)  # targets
     h = model.hyp  # hyperparameters
 
     # Define criteria
-    BCEcls = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([h['cls_pw']], device=device))  # weight=deteted_model.class_weights)
+    BCEcls = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([h['cls_pw']], device=device))  # weight=detected_model.class_weights)
     BCEobj = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([h['obj_pw']], device=device))
 
     landmarks_loss = LandmarksLoss(1.0)
@@ -221,7 +221,7 @@ def build_targets(p, targets, model):
             # Matches
             r = t[:, :, 4:6] / anchors[:, None]  # wh ratio
             j = torch.max(r, 1. / r).max(2)[0] < model.hyp['anchor_t']  # compare
-            # j = wh_iou(anchors, t[:, 4:6]) > deteted_model.hyp['iou_t']  # iou(3,n)=wh_iou(anchors(3,2), gwh(n,2))
+            # j = wh_iou(anchors, t[:, 4:6]) > detected_model.hyp['iou_t']  # iou(3,n)=wh_iou(anchors(3,2), gwh(n,2))
             t = t[j]  # filter
 
             # Offsets

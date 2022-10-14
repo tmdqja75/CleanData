@@ -64,15 +64,15 @@ def crawling_path(driver, url, model, encoding_df, pro_encoding_df):
     if auto_bool:
         auto_btn = driver.find_elements(By.XPATH, '//button[@data-tooltip-target-id="ytp-autonav-toggle-button"]')
         auto_btn[0].click()
-
-    setting_btn = driver.find_elements(By.XPATH, '//button[@class="ytp-button ytp-settings-button"]')
-    setting_btn_hd = driver.find_elements(By.XPATH,
-                                          '//button[@class="ytp-button ytp-settings-button ytp-hd-quality-badge"]')
-
-    if setting_btn:
-        setting_btn[0].click()
-    elif setting_btn_hd:
-        setting_btn_hd[0].click()
+    #
+    # setting_btn = driver.find_elements(By.XPATH, '//button[@class="ytp-button ytp-settings-button"]')
+    # setting_btn_hd = driver.find_elements(By.XPATH,
+    #                                       '//button[@class="ytp-button ytp-settings-button ytp-hd-quality-badge"]')
+    #
+    # if setting_btn:
+    #     setting_btn[0].click()
+    # elif setting_btn_hd:
+    #     setting_btn_hd[0].click()
 
     # detected person face
     id, is_vitim = display_df(driver=driver, url_name=url, dateString=dateString,

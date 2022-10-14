@@ -13,10 +13,10 @@ from flask import (Flask, abort, current_app, request, send_file,
 from flask_restful import Api, Resource, reqparse
 from werkzeug.utils import secure_filename
 
-from deteted_model.main import run
+from detected_model.main import run
 from deepface import DeepFace
 from deepface.detectors.FaceDetector import build_model
-from deteted_model.commons.yoloface.face_detector import YoloDetector
+from detected_model.commons.yoloface.face_detector import YoloDetector
 from conn_db.conn import Conn
 
 app = Flask(__name__)
