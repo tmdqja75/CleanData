@@ -2,12 +2,16 @@ import time
 
 import cv2
 import numpy as np
+from tkinter import Tk
 from deepface import DeepFace
 from deepface.commons import distance
 
 model_name = 'Facenet512'  # fix
 detector_backend = 'skip'  # fix mtcnn -> yolo(skip)
 
+tk = Tk()
+monitor_height = tk.winfo_screenheight()
+monitor_width = tk.winfo_screenwidth()
 
 def splitData(obj):
     """
@@ -128,9 +132,10 @@ def detectAndDisplay_yolo_df(image, df, pro_df, model):
     print(f'Detection took {detection_time} seconds')
     print(f'Comparison takes {process_time - detection_time} seconds')
     # --------time check-------- #
-    image = cv2.resize(src=image, dsize=(800, 600))
+    image = cv2.resize(src=image, dsize=(1200, 800))
     cv2.namedWindow("frame", flags=cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("frame", width=800, height=600)
+    cv2.resizeWindow("frame", width=1200, height=800)
     cv2.imshow("frame", image)
+    print(monitor_width)
 
     return match_check

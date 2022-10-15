@@ -5,6 +5,7 @@ import platform
 
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import requests
 import werkzeug
@@ -13,6 +14,7 @@ from flask import (Flask, abort, current_app, request, send_file,
 from flask_restful import Api, Resource, reqparse
 from werkzeug.utils import secure_filename
 
+from webdriver_manager.chrome import ChromeDriverManager
 from detected_model.main import run
 from deepface import DeepFace
 from deepface.detectors.FaceDetector import build_model
@@ -60,6 +62,7 @@ def initialize():
                              target_size=480, gpu=-1)
     DeepFace.build_model("Facenet512")
     build_model('mtcnn')
+
     return model
 
 model=initialize()
@@ -108,15 +111,11 @@ def image_api():
     # 영상 생성 시점 'yyyy-mm-dd'형식으로 formatting
     if vid_date is not None:
         vid_date = datetime.strptime(vid_date[:15], '%a %b %d %Y').strftime('%Y-%m-%d')
-        print("VID_DATE:", vid_date)
     
         # 피해자 원본 영상 생성 시점(startDate)를 txt 파일에 기록하기
         with open(f'{app.config["UPLOAD_FOLDER"]}/startDate.txt', 'a') as f_date:
             f_date.write(vid_date+"\n")
         f_date.close()
-
-    print("app.py line 95 file_path: ",file_path)
-    print("list(request.files.listvalues())[0]", list(request.files.listvalues())[0])
 
     # 사진 파일들을 새 uuid 이름을 지정한 뒤위에 생성된 directory에 저장
     for f in list(request.files.listvalues())[0]:
@@ -141,7 +140,7 @@ def df2dict(dataframe, target):
     ans['videoCount'] = len(dataframe)
     ans['detectCount'] = len(df1)
     ans['userEmail'] = target
-    ans['urlList'] = str(urls)
+    ans['urlList'] = urls
     return ans
 
 def send_csvfile(img_owner):
@@ -178,7 +177,7 @@ def send_csvfile(img_owner):
     conn1 = Conn(id='root', pwd='root') # id, pwd 변경
     for client in list_client:
         data = df2dict(dataframe=result, target=client)
-        df = pd.DataFrame(data=data, index=[0])
+        df = pd.DataFrame(data=data)
         conn1.df2resultdata(df)
     # 아래 내용이 필요 없음.
 
@@ -208,7 +207,6 @@ def send_json():
     files = {'answer.csv':open(PATH, 'r', encoding='utf8')}
 
     r = requests.post(url, files=files, headers=head)
-    print(r.request.body)
     return {"message":"csv send done"}
 
 # 진행중일때. 알림 표시.
@@ -218,6 +216,20 @@ def runnuing():
     msg = f.read()
     f.close()
     return {"message":msg} # java 161 참고.
+
+
+@app.route('/image/test', methods=['POST'])
+def addTesturl():
+    data = request.form.to_dict()
+    data['pro_actor']=False
+    data['id']=''
+    data['answer']='Test'
+    df = pd.DataFrame(data=data, index=[0])
+
+    df_r = pd.read_csv(cleandata + '/data/testURL_youtube.csv')
+    df_c = pd.concat([df_r,df])
+    df_c.to_csv(cleandata + '/data/testURL_youtube.csv', index=False, encoding='utf-8-sig')
+    return {"message":data}
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
