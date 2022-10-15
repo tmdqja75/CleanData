@@ -25,7 +25,7 @@ class Conn:
                   'image': sqlalchemy.dialects.mysql.types.MEDIUMBLOB,
                    'name': sqlalchemy.types.VARCHAR(100),
                    'size': sqlalchemy.dialects.mysql.MEDIUMTEXT,
-                   'uploader': sqlalchemy.types.VARCHAR(100),
+                   'uploader': sqlalchemy.types.VARCHAR(40),
                    'startDate': sqlalchemy.types.VARCHAR(100)}
         try:
             dataframe.to_sql(name='facedata', con=self.conn, if_exists='append',
@@ -38,11 +38,14 @@ class Conn:
         dtypesql = {'id': sqlalchemy.types.INT,
                     'videoCount': sqlalchemy.types.INT,
                     'detectCount': sqlalchemy.types.INT,
-                    'userEmail': sqlalchemy.types.VARCHAR(100),
+                    'userEmail': sqlalchemy.types.VARCHAR(40),
                     'urlList': sqlalchemy.types.VARCHAR(200)}
-        dataframe.to_sql(name='resultdata', con=self.conn, if_exists='append',
+        try:
+            dataframe.to_sql(name='resultdata', con=self.conn, if_exists='append',
                              index=False, dtype=dtypesql)
-
+            return True
+        except:
+            return False
 
     def df2user(self, dataframe):
         dtypesql = {'id': sqlalchemy.types.INT,
