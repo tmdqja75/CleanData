@@ -5,6 +5,7 @@ import platform
 
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import requests
 import werkzeug
@@ -13,13 +14,16 @@ from flask import (Flask, abort, current_app, request, send_file,
 from flask_restful import Api, Resource, reqparse
 from werkzeug.utils import secure_filename
 
-from deteted_model.main import run
+from webdriver_manager.chrome import ChromeDriverManager
+from detected_model.main import run
 from deepface import DeepFace
 from deepface.detectors.FaceDetector import build_model
-from deteted_model.commons.yoloface.face_detector import YoloDetector
+from detected_model.commons.yoloface.face_detector import YoloDetector
+from conn_db.conn import Conn
 
 app = Flask(__name__)
 app.secret_key = "secret key"
+
 
 os_name = platform.system()
 root = "/"
@@ -58,6 +62,7 @@ def initialize():
                              target_size=480, gpu=-1)
     DeepFace.build_model("Facenet512")
     build_model('mtcnn')
+
     return model
 
 model=initialize()
@@ -106,15 +111,11 @@ def image_api():
     # 영상 생성 시점 'yyyy-mm-dd'형식으로 formatting
     if vid_date is not None:
         vid_date = datetime.strptime(vid_date[:15], '%a %b %d %Y').strftime('%Y-%m-%d')
-        print("VID_DATE:", vid_date)
     
         # 피해자 원본 영상 생성 시점(startDate)를 txt 파일에 기록하기
         with open(f'{app.config["UPLOAD_FOLDER"]}/startDate.txt', 'a') as f_date:
             f_date.write(vid_date+"\n")
         f_date.close()
-
-    print("app.py line 95 file_path: ",file_path)
-    print("list(request.files.listvalues())[0]", list(request.files.listvalues())[0])
 
     # 사진 파일들을 새 uuid 이름을 지정한 뒤위에 생성된 directory에 저장
     for f in list(request.files.listvalues())[0]:
@@ -124,14 +125,23 @@ def image_api():
             filename = str(uuid.uuid1()) + "." + extension
 
             f.save(os.path.join(file_path, filename))
-    msg = "File(s) successfully uploaded"
-    print(type(msg))
-    requests.post('http://localhost:8080/image/receive', data=msg)
+
     # return {"message": "File(s) successfully uploaded"}
-    resultData = send_csvfile(img_owner)
-    requests.post('http://localhost:8080/image/result', json=dict(resultData))
+    # resultData = send_csvfile(img_owner)
+    send_csvfile(img_owner)
+    # requests.post('http://localhost:8080/image/result', json=dict(resultData))
     return {"message": "File(s) successfully uploaded"}
 
+def df2dict(dataframe, target):
+    ans = {}
+    df1 = dataframe.loc[dataframe['id']==target]
+    urls = [url for url in df1['link']]
+    ans['id'] = 0
+    ans['videoCount'] = len(dataframe)
+    ans['detectCount'] = len(df1)
+    ans['userEmail'] = target
+    ans['urlList'] = urls
+    return ans
 
 def send_csvfile(img_owner):
     # 피해자 리스트 중에 영상 시작일이 가장 일찍인 영상 시점 찾기
@@ -144,7 +154,8 @@ def send_csvfile(img_owner):
     earliest_date = min(datelist)
     f_date.close()
     os.remove(cleandata+"/data/startDate.txt")
-    
+
+    #
     # 딥러닝 모델 작동
     run(earliest_date, model)
 
@@ -158,26 +169,35 @@ def send_csvfile(img_owner):
     df_result = pd.read_csv(PATH)
     # result = df_result[df_result['등장인물']=='정답영상']
     result = df_result.dropna(axis=0)
-    list_client = list(result.id.unique())
     #-----------------
-    
-    # ---결과값 json formatting 결과 dict형식으로 준비---
-    return_dict = dict()
-    return_dict["total_inspected_video_count"] = str(len(result)) # 검색한 결과
-    return_dict["result"] = []
 
+    # csv to db
+    list_client = [x for x in result.id.unique() if x not in "@"]
+    list_pro_actor = [x for x in result.id.unique() if x not in "@"]
+    conn1 = Conn(id='root', pwd='root') # id, pwd 변경
     for client in list_client:
-        if img_owner == client:
-            client_dict = dict()
-            client_dict["requested_user_email"] = client
-            client_dict["urls"] = result[result["id"]==client]["link"].to_list()
-            return_dict["result"].append(client_dict)
+        data = df2dict(dataframe=result, target=client)
+        df = pd.DataFrame(data=data)
+        conn1.df2resultdata(df)
+    # 아래 내용이 필요 없음.
+
+    # ---결과값 json formatting 결과 dict형식으로 준비---
+    # return_dict = dict()
+    # return_dict["total_inspected_video_count"] = str(len(result)) # 검색한 결과
+    # return_dict["result"] = []
+    #
+    # for client in list_client:
+    #     if img_owner == client:
+    #         client_dict = dict()
+    #         client_dict["requested_user_email"] = client
+    #         client_dict["urls"] = result[result["id"]==client]["link"].to_list()
+    #         return_dict["result"].append(client_dict)
     #------------------------------------------------
     
     # 내보낼 결과값 json 형식으로 변형
     # return_json = json.dumps(return_dict, indent=2)
     # print(return_json, type(return_json))
-    return return_dict
+    # return return_dict
 @app.route("/image/toCsv", methods=['GET'])
 def send_json():
     url = 'http://localhost:8080/image/downCsv'
@@ -187,8 +207,29 @@ def send_json():
     files = {'answer.csv':open(PATH, 'r', encoding='utf8')}
 
     r = requests.post(url, files=files, headers=head)
-    print(r.request.body)
     return {"message":"csv send done"}
+
+# 진행중일때. 알림 표시.
+@app.route('/image/running', methods=['GET'])
+def runnuing():
+    f = open(cleandata + "/data/running.txt", "r")
+    msg = f.read()
+    f.close()
+    return {"message":msg} # java 161 참고.
+
+
+@app.route('/image/test', methods=['POST'])
+def addTesturl():
+    data = request.form.to_dict()
+    data['pro_actor']=False
+    data['id']=''
+    data['answer']='Test'
+    df = pd.DataFrame(data=data, index=[0])
+
+    df_r = pd.read_csv(cleandata + '/data/testURL_youtube.csv')
+    df_c = pd.concat([df_r,df])
+    df_c.to_csv(cleandata + '/data/testURL_youtube.csv', index=False, encoding='utf-8-sig')
+    return {"message":data}
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)

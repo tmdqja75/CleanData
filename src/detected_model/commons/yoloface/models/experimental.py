@@ -111,11 +111,11 @@ class Ensemble(nn.ModuleList):
 
 
 def attempt_load(weights, map_location=None):
-    # Loads an ensemble of models weights=[a,b,c] or a single deteted_model weights=[a] or weights=a
+    # Loads an ensemble of models weights=[a,b,c] or a single detected_model weights=[a] or weights=a
     model = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
         attempt_download(w)
-        model.append(torch.load(w, map_location=map_location)['deteted_model'].float().fuse().eval())  # load FP32 deteted_model
+        model.append(torch.load(w, map_location=map_location)['detected_model'].float().fuse().eval())  # load FP32 detected_model
 
     # Compatibility updates
     for m in model.modules():
@@ -125,7 +125,7 @@ def attempt_load(weights, map_location=None):
             m._non_persistent_buffers_set = set()  # pytorch 1.6.0 compatibility
 
     if len(model) == 1:
-        return model[-1]  # return deteted_model
+        return model[-1]  # return detected_model
     else:
         print('Ensemble created with %s\n' % weights)
         for k in ['names', 'stride']:

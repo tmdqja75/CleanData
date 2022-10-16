@@ -1,4 +1,4 @@
-"""Exports a YOLOv5 *.pt deteted_model to ONNX and TorchScript formats
+"""Exports a YOLOv5 *.pt detected_model to ONNX and TorchScript formats
 
 Usage:
     $ export PYTHONPATH="$PWD" && python models/export.py --weights ./weights/yolov5s.pt --img 640 --batch 1
@@ -30,8 +30,8 @@ if __name__ == '__main__':
     set_logging()
     t = time.time()
 
-    # Load PyTorch deteted_model
-    model = attempt_load(opt.weights, map_location=torch.device('cpu'))  # load FP32 deteted_model
+    # Load PyTorch detected_model
+    model = attempt_load(opt.weights, map_location=torch.device('cpu'))  # load FP32 detected_model
     model.eval()
     labels = model.names
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # Input
     img = torch.zeros(opt.batch_size, 3, *opt.img_size)  # image size(1,3,320,192) iDetection
 
-    # Update deteted_model
+    # Update detected_model
     for k, m in model.named_modules():
         m._non_persistent_buffers_set = set()  # pytorch 1.6.0 compatibility
         if isinstance(m, Conv):  # assign export-friendly activations
@@ -63,9 +63,9 @@ if __name__ == '__main__':
                       output_names=['stride_' + str(int(x)) for x in model.stride])
 
     # Checks
-    onnx_model = onnx.load(f)  # load onnx deteted_model
-    onnx.checker.check_model(onnx_model)  # check onnx deteted_model
-    # print(onnx.helper.printable_graph(onnx_model.graph))  # print a human readable deteted_model
+    onnx_model = onnx.load(f)  # load onnx detected_model
+    onnx.checker.check_model(onnx_model)  # check onnx detected_model
+    # print(onnx.helper.printable_graph(onnx_model.graph))  # print a human readable detected_model
     print('ONNX export success, saved as %s' % f)
     # Finish
     print('\nExport complete (%.2fs). Visualize with https://github.com/lutzroeder/netron.' % (time.time() - t))

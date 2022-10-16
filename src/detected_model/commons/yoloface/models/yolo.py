@@ -91,22 +91,22 @@ class Detect(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, cfg='yolov5s.yaml', ch=3, nc=None):  # deteted_model, input channels, number of classes
+    def __init__(self, cfg='yolov5s.yaml', ch=3, nc=None):  # detected_model, input channels, number of classes
         super(Model, self).__init__()
         if isinstance(cfg, dict):
-            self.yaml = cfg  # deteted_model dict
+            self.yaml = cfg  # detected_model dict
         else:  # is *.yaml
             import yaml  # for torch hub
             self.yaml_file = Path(cfg).name
             with open(cfg) as f:
-                self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # deteted_model dict
+                self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # detected_model dict
 
-        # Define deteted_model
+        # Define detected_model
         ch = self.yaml['ch'] = self.yaml.get('ch', ch)  # input channels
         if nc and nc != self.yaml['nc']:
-            logger.info('Overriding deteted_model.yaml nc=%g with nc=%g' % (self.yaml['nc'], nc))
+            logger.info('Overriding detected_model.yaml nc=%g with nc=%g' % (self.yaml['nc'], nc))
             self.yaml['nc'] = nc  # override yaml value
-        self.model, self.save = parse_model(deepcopy(self.yaml), ch=[ch])  # deteted_model, savelist
+        self.model, self.save = parse_model(deepcopy(self.yaml), ch=[ch])  # detected_model, savelist
         self.names = [str(i) for i in range(self.yaml['nc'])]  # default names
         # print([x.shape for x in self.forward(torch.zeros(1, ch, 64, 64))])
 
@@ -184,11 +184,11 @@ class Model(nn.Module):
             print(('%6g Conv2d.bias:' + '%10.3g' * 6) % (mi.weight.shape[1], *b[:5].mean(1).tolist(), b[5:].mean()))
 
     # def _print_weights(self):
-    #     for m in self.deteted_model.modules():
+    #     for m in self.detected_model.modules():
     #         if type(m) is Bottleneck:
     #             print('%10.3g' % (m.w.detach().sigmoid() * 2))  # shortcut weights
 
-    def fuse(self):  # fuse deteted_model Conv2d() + BatchNorm2d() layers
+    def fuse(self):  # fuse detected_model Conv2d() + BatchNorm2d() layers
         print('Fusing layers... ')
         for m in self.model.modules():
             if type(m) is Conv and hasattr(m, 'bn'):
@@ -214,11 +214,11 @@ class Model(nn.Module):
 
     def autoshape(self):  # add autoShape module
         print('Adding autoShape... ')
-        m = autoShape(self)  # wrap deteted_model
+        m = autoShape(self)  # wrap detected_model
         copy_attr(m, self, include=('yaml', 'nc', 'hyp', 'names', 'stride'), exclude=())  # copy attributes
         return m
 
-    def info(self, verbose=False, img_size=640):  # print deteted_model information
+    def info(self, verbose=False, img_size=640):  # print detected_model information
         model_info(self, verbose, img_size)
 
 
@@ -289,14 +289,14 @@ from thop import profile
 from thop import clever_format
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='deteted_model.yaml')
+    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='detected_model.yaml')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     opt = parser.parse_args()
     opt.cfg = check_file(opt.cfg)  # check file
     set_logging()
     device = select_device(opt.device)
     
-    # Create deteted_model
+    # Create detected_model
     model = Model(opt.cfg).to(device)
     stride = model.stride.max()
     if stride == 32:
@@ -304,7 +304,7 @@ if __name__ == '__main__':
     else:
         input = torch.Tensor(1, 3, 512, 640).to(device)
     model.train()
-    # print(deteted_model)
+    # print(detected_model)
     flops, params = profile(model, inputs=(input, ))
     flops, params = clever_format([flops, params], "%.3f")
     print('Flops:', flops, ',Params:' ,params)

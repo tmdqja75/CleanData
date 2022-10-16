@@ -233,7 +233,7 @@ class NMS(nn.Module):
         return non_max_suppression(x[0], conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)
 
 class autoShape(nn.Module):
-    # input-robust deteted_model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
+    # input-robust detected_model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
     img_size = 640  # inference size (pixels)
     conf = 0.25  # NMS confidence threshold
     iou = 0.45  # NMS IoU threshold
@@ -244,7 +244,7 @@ class autoShape(nn.Module):
         self.model = model.eval()
 
     def autoshape(self):
-        print('autoShape already enabled, skipping... ')  # deteted_model already converted to deteted_model.autoshape()
+        print('autoShape already enabled, skipping... ')  # detected_model already converted to detected_model.autoshape()
         return self
 
     def forward(self, imgs, size=640, augment=False, profile=False):

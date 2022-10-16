@@ -86,7 +86,7 @@ class YoloDetector:
         
     def _postprocess(self, imgs, origimgs, pred, conf_thres, iou_thres):
         """
-            Postprocessing of raw pytorch deteted_model output.
+            Postprocessing of raw pytorch detected_model output.
             Returns:
                 bboxes: list of arrays with 4 coordinates of bounding boxes with format x1,y1,x2,y2.
                 points: list of arrays with coordinates of 5 facial keypoints (eyes, nose, lips corners).

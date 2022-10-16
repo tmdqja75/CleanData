@@ -1,6 +1,7 @@
 import os
 import pickle
-import platform
+import time
+
 import cv2
 import numpy as np
 import pandas as pd
@@ -8,11 +9,12 @@ import platform
 
 from deepface import DeepFace
 from tqdm import tqdm
-from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
 from glob import glob
-
-from .yoloface.face_detector import YoloDetector
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 os_name = platform.system()
 
@@ -173,8 +175,8 @@ def default_set(model, os_name='Windows', start_date='2018-01-01', avi_length=60
     if os_name == 'Windows':
         datapath = cleandata + '\\data'
 
-    rb = embeded_file(datapath=datapath, target="target", pro=False, model=model) # add deteted_model
-    pro_rb = embeded_file(datapath=datapath, target="AvList", pro=True, model=model) # add deteted_model
+    rb = embeded_file(datapath=datapath, target="target", pro=False, model=model) # add detected_model
+    pro_rb = embeded_file(datapath=datapath, target="AvList", pro=True, model=model) # add detected_model
 
     data = rb
     pro_data = pro_rb
@@ -209,7 +211,7 @@ def default_set(model, os_name='Windows', start_date='2018-01-01', avi_length=60
     tmp_df1.reset_index(drop=True, inplace=True)
 
     ext_file2 = cleandata + '/src/driver_tools/cjpalhdlnbpafiamejdnhcphjbkeiagm.crx'
-    
+
     if platform.system() =='Windows':
         executable_path = cleandata + '/src/driver_tools/chromedriver.exe'
     else:
@@ -218,8 +220,6 @@ def default_set(model, os_name='Windows', start_date='2018-01-01', avi_length=60
     options = Options()
 
     options.add_extension(ext_file2)
-
-    print(executable_path)
 
     driver = webdriver.Chrome(executable_path=executable_path, chrome_options=options)
 
