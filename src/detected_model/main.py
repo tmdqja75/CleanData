@@ -212,8 +212,12 @@ def run(startDate, model, raw_len):
     f.close()
 
     for i, (url, total_time) in enumerate(zip(tmp_df1['link'], tmp_df1['total_len'])):
-        id, is_vitim = crawling_path(driver=driver, url=url, model=model,
+        try:
+            id, is_vitim = crawling_path(driver=driver, url=url, model=model,
                                      encoding_df=encoding_df, pro_encoding_df=pro_encoding_df, total_time=total_time) # 이름, 전문배우 (맞으면 True, 틀리면 False)
+        except:
+            print(url+": pass")
+            pass
         if is_vitim:
             print(is_vitim, id)
             tmp_df1.loc[i, "pro_actor"] = is_vitim
