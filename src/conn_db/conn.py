@@ -2,6 +2,8 @@ import pandas as pd
 import sqlalchemy.dialects.mysql.types
 from sqlalchemy import create_engine
 
+
+
 class Conn:
     def __init__(self, id, pwd, host='localhost', name='catchvdatabase'):
         self.db_cfg = dict()
@@ -51,7 +53,7 @@ class Conn:
         dtypesql = {'id': sqlalchemy.types.INT,
                     'userEmail': sqlalchemy.types.CHAR(40),
                     'userPassword': sqlalchemy.types.CHAR(100),
-                    'loginstatus': sqlalchemy.dialects.mysql.TINYINT}
+                    'loginStatus': sqlalchemy.dialects.mysql.TINYINT}
         try:
             dataframe.to_sql(name='user', con=self.conn, if_exists='append',
                              index=False, dtype=dtypesql)

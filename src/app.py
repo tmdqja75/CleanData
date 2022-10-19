@@ -1,25 +1,19 @@
-import json
 import os
-import uuid
+import os
 import platform
-
+import uuid
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import requests
-import werkzeug
-from flask import (Flask, abort, current_app, request, send_file,
-                   send_from_directory)
-from flask_restful import Api, Resource, reqparse
-from werkzeug.utils import secure_filename
-
-from webdriver_manager.chrome import ChromeDriverManager
-from detected_model.main import run
 from deepface import DeepFace
 from deepface.detectors.FaceDetector import build_model
-from detected_model.commons.yoloface.face_detector import YoloDetector
+from flask import (Flask, request, send_file)
+from flask_restful import Api
+
 from conn_db.conn import Conn
+from detected_model.commons.yoloface.face_detector import YoloDetector
+from detected_model.main import run
 
 app = Flask(__name__)
 app.secret_key = "secret key"
@@ -97,6 +91,12 @@ def image_api():
         
     # 사진 소유자 email과 영상 생성 시점 받이오기
     img_owner = request.form['userEmail']
+    raw_len = request.form['raw_len']
+    if raw_len == '':
+        raw_len = 60*60
+    else:
+        raw_len = int(raw_len)
+
     # 영상 생성 시점이 있는지 없는지 확인
     try:
         vid_date = request.form['startDate'] # form: 'Fri Sep 09 2022 15:00:12 GMT+0900'
@@ -107,7 +107,11 @@ def image_api():
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], "target/"+img_owner)
     if not os.path.isdir(file_path):
         os.mkdir(file_path)
-    
+
+    if raw_len is None or raw_len == 0:
+        raw_len == 60*60
+        print("raw_len == None or raw_len == 0 : ", request.form['raw_len'])
+
     # 영상 생성 시점 'yyyy-mm-dd'형식으로 formatting
     if vid_date is not None:
         vid_date = datetime.strptime(vid_date[:15], '%a %b %d %Y').strftime('%Y-%m-%d')
@@ -128,7 +132,7 @@ def image_api():
 
     # return {"message": "File(s) successfully uploaded"}
     # resultData = send_csvfile(img_owner)
-    send_csvfile(img_owner)
+    send_csvfile(img_owner, raw_len)
     # requests.post('http://localhost:8080/image/result', json=dict(resultData))
     return {"message": "File(s) successfully uploaded"}
 
@@ -143,7 +147,7 @@ def df2dict(dataframe, target):
     ans['urlList'] = urls
     return ans
 
-def send_csvfile(img_owner):
+def send_csvfile(img_owner, raw_len=600):
     # 피해자 리스트 중에 영상 시작일이 가장 일찍인 영상 시점 찾기
     datelist = []
     f_date = open(os.path.join(app.config['UPLOAD_FOLDER'], 'startDate.txt'))
@@ -157,7 +161,7 @@ def send_csvfile(img_owner):
 
     #
     # 딥러닝 모델 작동
-    run(earliest_date, model)
+    run(earliest_date, model, raw_len)
 
     # 모델 종료.
     f = open(cleandata+"/data/running.txt", "w")
@@ -172,9 +176,9 @@ def send_csvfile(img_owner):
     #-----------------
 
     # csv to db
-    list_client = [x for x in result.id.unique() if x not in "@"]
-    list_pro_actor = [x for x in result.id.unique() if x not in "@"]
-    conn1 = Conn(id='root', pwd='root') # id, pwd 변경
+    list_client = [x for x in result.id.unique() if "@" in x]
+    list_pro_actor = [x for x in result.id.unique() if "@" not in x]
+    conn1 = Conn(id='admin', pwd='root1234') # id, pwd 변경
     for client in list_client:
         data = df2dict(dataframe=result, target=client)
         df = pd.DataFrame(data=data)

@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import platform
+import datetime
 
 from deepface import DeepFace
 from tqdm import tqdm
@@ -67,6 +68,24 @@ def time_second(strtime):
         total_time += (int(time) * (60**i))
     return total_time
 
+def time2str(seconds):
+    seconds = int(seconds)
+    str_time = str(datetime.timedelta(seconds=seconds))
+    split_time = str_time.split(':')
+    print(split_time)
+    ans = []
+    for i, st in enumerate(split_time):
+        print(i, len(ans))
+        if i == 0 and st =='0':
+            pass
+        elif i > 0 and len(ans) >= 1:
+            ans.append(st)
+        elif i==0 and st!='0':
+            ans.append(st)
+        else:
+            ans.append(str(int(split_time[1])))
+    output = ':'.join(ans)
+    return output
 
 def rm_dir(paths):  # 파일 삭제.
     """
@@ -155,7 +174,7 @@ def embeded_file(datapath, model, target="target", pro=False):
     return rb
 
 
-def default_set(model, os_name='Windows', start_date='2018-01-01', avi_length=60*60*2):
+def default_set(model, os_name='Windows', start_date='2018-01-01', avi_length=60*60):
     """
     :param model: YoLo model
     :param os_name: platform.system() 으로 받아온 os name
