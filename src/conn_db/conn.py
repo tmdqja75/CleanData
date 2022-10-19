@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 
 
 class Conn:
-    def __init__(self, id, pwd, host='catchvdatabase.cacbf3hfuszv.ap-northeast-2.rds.amazonaws.com', name='catchvdatabase'):
+    def __init__(self, id, pwd, host='localhost', name='catchvdatabase'):
         self.db_cfg = dict()
         self.db_cfg['db_id'] = id
         self.db_cfg['db_pwd'] = pwd
