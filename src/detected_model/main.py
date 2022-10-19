@@ -57,24 +57,6 @@ cfg = {'youtube':
                 'fullScreen_btn': '//div[@class="mgp_fullscreen"]'}
            }
 
-def time2str(seconds):
-    seconds = int(seconds)
-    str_time = str(datetime.timedelta(seconds=seconds))
-    split_time = str_time.split(':')
-    print(split_time)
-    ans = []
-    for i, st in enumerate(split_time):
-        print(i, len(ans))
-        if i == 0 and st =='0':
-            pass
-        elif i > 0 and len(ans) >= 1:
-            ans.append(st)
-        elif i==0 and st!='0':
-            ans.append(st)
-        else:
-            ans.append(str(int(split_time[1])))
-    output = ':'.join(ans)
-    return output
 
 def crawling_path(driver, url, model, encoding_df, pro_encoding_df, total_time):
     """
@@ -110,7 +92,7 @@ def crawling_path(driver, url, model, encoding_df, pro_encoding_df, total_time):
         except:
             pass
     # 총 동영상 길이에 따른 필터링
-    dateString = time2str(total_time)  # '4:46' '10:46' '1:00:02'
+    dateString = functions.time2str(total_time)  # '4:46' '10:46' '1:00:02'
 
     # 전체화면
 
@@ -212,8 +194,9 @@ def display_df(driver, url_name, dateString, site_cfg, encoding_df, pro_encoding
 # CleanData 폴더에서 실행할것.
 # python ./face_recognition/main.py
 # if __name__ == '__main__':
-def run(startDate, model):
+def run(startDate, model, raw_len):
     """
+    :param raw_len: 영상 길이
     :param startDate: 날짜 값을 받음
     :param model: YOLO Model
     startDate format is "2018-01-01"
@@ -221,7 +204,7 @@ def run(startDate, model):
         None
     """
     # 유출된 날짜(start_date), 동영상 총 길이(avi_length)을 입력받는다.
-    avi_length = 600
+    avi_length = raw_len
     tmp_df1, driver, encoding_df, pro_encoding_df = \
         functions.default_set(model=model, os_name=platform.system(), start_date=startDate, avi_length=avi_length)
     with open(cleandata+'/data/running.txt', 'w') as f:
