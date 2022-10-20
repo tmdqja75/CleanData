@@ -50,6 +50,7 @@ Pillow==9.2.0
 protobuf==3.19.4
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+PyMySQL==1.0.2
 PyAutoGUI==0.9.53
 pycparser==2.21
 PyGetWindow==0.0.9
@@ -93,3 +94,4 @@ urllib3==1.26.12
 Werkzeug==2.2.2
 wrapt==1.14.1
 wsproto==1.2.0
+SQLAlchemy==1.4.41
