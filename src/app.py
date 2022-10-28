@@ -92,6 +92,7 @@ def image_api():
     # 사진 소유자 email과 영상 생성 시점 받이오기
     img_owner = request.form['userEmail']
     raw_len = request.form['raw_len']
+    print('raw_len',raw_len)
     if raw_len == '':
         raw_len = 60*60
     else:
