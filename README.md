@@ -24,7 +24,7 @@
 
 ## Demo Website
 
-- Please click this [**Link**](http://catchv-cf.duckdns.org:128)
+- Please click this [**Link**](http://catchv.net)
 
 ---
 
